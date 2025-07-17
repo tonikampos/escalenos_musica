@@ -1,0 +1,19 @@
+{
+  "name": "MusicGuess - Adivina la Canción",
+  "short_name": "MusicGuess",
+  "description": "Juego musical para adivinar canciones en 10 segundos",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#191414",
+  "theme_color": "#1DB954",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/music-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["music", "games", "entertainment"],
+  "lang": "es"
+}
