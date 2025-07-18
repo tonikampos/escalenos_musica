@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Music, Play, Pause, Volume2, RotateCcw, Star, Settings, Trophy } from 'lucide-react'
 import { useGameState } from './hooks/useGameState'
 
@@ -6,6 +6,7 @@ function App() {
   const {
     gameState,
     stats,
+    availableSongs,
     startGame,
     nextRound,
     selectAnswer,
@@ -15,23 +16,55 @@ function App() {
   } = useGameState()
 
   const audioRef = useRef<HTMLAudioElement>(null)
+  const [audioEnabled, setAudioEnabled] = useState(false)
+
+  // Función para activar el audio (necesaria para algunos navegadores)
+  const enableAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = false
+      audioRef.current.volume = 0.7
+      setAudioEnabled(true)
+      
+      // Reproducir y pausar inmediatamente para "activar" el audio
+      audioRef.current.play().then(() => {
+        audioRef.current?.pause()
+      }).catch(console.error)
+    }
+  }
 
   // Manejar reproducción de audio
   useEffect(() => {
     if (audioRef.current && gameState.currentSong) {
       if (gameState.isPlaying) {
         audioRef.current.src = gameState.currentSong.previewUrl
-        audioRef.current.play().catch(console.error)
+        audioRef.current.volume = 0.7 // Volumen al 70%
         
-        // Pausar después de 10 segundos
-        const timer = setTimeout(() => {
-          if (audioRef.current) {
-            audioRef.current.pause()
-            togglePlayback()
-          }
-        }, 10000)
-
-        return () => clearTimeout(timer)
+        // Intentar reproducir con manejo de errores
+        const playPromise = audioRef.current.play()
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Audio playing successfully')
+              // Pausar después de 10 segundos
+              const timer = setTimeout(() => {
+                if (audioRef.current) {
+                  audioRef.current.pause()
+                  togglePlayback()
+                }
+              }, 10000)
+              
+              return () => clearTimeout(timer)
+            })
+            .catch((error) => {
+              console.error('Error playing audio:', error)
+              // Si falla, intentar con interacción del usuario
+              if (error.name === 'NotAllowedError') {
+                alert('⚠️ Por favor, haz clic en el botón de reproducir para activar el audio')
+              }
+              togglePlayback()
+            })
+        }
       } else {
         audioRef.current.pause()
       }
@@ -155,6 +188,23 @@ function App() {
           >
             {gameState.isLoading ? 'Cargando canciones...' : 'Empezar a jugar'}
           </button>
+          
+          {/* Debug info */}
+          <div className="mt-4 text-xs text-gray-400 text-center">
+            <button 
+              onClick={() => console.log('🔧 Debug Info:', {
+                hasClientId: !!import.meta.env.VITE_SPOTIFY_CLIENT_ID,
+                hasClientSecret: !!import.meta.env.VITE_SPOTIFY_CLIENT_SECRET,
+                redirectUri: import.meta.env.VITE_SPOTIFY_REDIRECT_URI,
+                availableSongs: availableSongs.length,
+                category: gameState.category,
+                difficulty: gameState.difficulty
+              })}
+              className="text-xs text-gray-500 hover:text-spotify-green"
+            >
+              🔧 Debug Info (Ver consola)
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -220,11 +270,35 @@ function App() {
             )}
             {gameState.isPlaying ? 'Pausar' : 'Reproducir'}
           </button>
+
+          {/* Botón de activar audio si es necesario */}
+          {!audioEnabled && (
+            <button 
+              onClick={enableAudio}
+              className="button-secondary text-sm"
+            >
+              🔊 Activar Audio
+            </button>
+          )}
         </div>
 
         {gameState.isPlaying && (
           <div className="text-sm text-gray-300">
             Reproduciendo... 10 segundos
+          </div>
+        )}
+
+        {/* Debug info - mostrar URL del audio */}
+        {gameState.currentSong && (
+          <div className="mt-4 text-xs text-gray-400 text-center">
+            <details>
+              <summary className="cursor-pointer">🔧 Debug Info</summary>
+              <div className="mt-2 p-2 bg-black/20 rounded text-left">
+                <div>URL: {gameState.currentSong.previewUrl}</div>
+                <div>Audio habilitado: {audioEnabled ? '✅' : '❌'}</div>
+                <div>Estado: {gameState.isPlaying ? 'Reproduciendo' : 'Pausado'}</div>
+              </div>
+            </details>
           </div>
         )}
       </div>

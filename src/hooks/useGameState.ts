@@ -77,30 +77,46 @@ export const useGameState = () => {
     setGameState(prev => ({ ...prev, isLoading: true }))
     
     try {
+      console.log('🎵 Cargando canciones de Spotify...', { category })
+      console.log('🔑 Client ID:', import.meta.env.VITE_SPOTIFY_CLIENT_ID?.slice(0, 5) + '...')
+      console.log('🔑 Client Secret:', import.meta.env.VITE_SPOTIFY_CLIENT_SECRET ? 'Configurado' : 'No configurado')
+      
       let tracks: SpotifyTrack[] = []
       
       // Intentar diferentes fuentes según la categoría
       if (category === 'hits') {
         // Playlist de Top 50 Global de Spotify
+        console.log('🎯 Intentando cargar Top 50 Global...')
         tracks = await spotifyService.getPlaylistTracks('37i9dQZEVXbMDoHDwVN2tF')
       } else if (category === 'rock') {
+        console.log('🎸 Intentando cargar canciones de rock...')
         tracks = await spotifyService.getRandomTracks('rock', 50)
       } else if (category === 'latin') {
+        console.log('🎺 Intentando cargar canciones latinas...')
         tracks = await spotifyService.getRandomTracks('latin', 50)
       } else if (category === 'electronic') {
+        console.log('🎹 Intentando cargar música electrónica...')
         tracks = await spotifyService.getRandomTracks('electronic', 50)
       } else {
         // Por defecto, canciones populares
+        console.log('🎤 Intentando cargar canciones pop...')
         tracks = await spotifyService.getRandomTracks('pop', 50)
       }
 
+      console.log('📊 Canciones obtenidas de Spotify:', tracks.length)
+      console.log('📋 Primeras 3 canciones:', tracks.slice(0, 3).map(t => ({ title: t.name, artist: t.artists[0]?.name, hasPreview: !!t.preview_url })))
+
       const songs = tracks.map(convertSpotifyTrack)
+      console.log('✅ Canciones convertidas:', songs.length)
+      console.log('🎵 Canciones con preview:', songs.filter(s => s.previewUrl).length)
+      
       setAvailableSongs(songs)
       
     } catch (error) {
-      console.error('Error loading songs from Spotify:', error)
+      console.error('❌ Error loading songs from Spotify:', error)
       
       // Fallback a canciones de ejemplo si Spotify falla
+      console.log('🔄 Usando canciones de ejemplo...')
       const fallbackSongs: Song[] = [
         {
           id: '1',
@@ -131,6 +147,7 @@ export const useGameState = () => {
           albumCover: 'https://via.placeholder.com/300x300/45B7D1/ffffff?text=🍉'
         }
       ]
+      console.log('📝 Canciones de ejemplo configuradas:', fallbackSongs.length)
       setAvailableSongs(fallbackSongs)
     }
     
@@ -259,6 +276,7 @@ export const useGameState = () => {
   return {
     gameState,
     stats,
+    availableSongs,
     startGame,
     nextRound,
     selectAnswer,

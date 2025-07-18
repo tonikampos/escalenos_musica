@@ -51,9 +51,14 @@ class SpotifyService {
   // Obtener token de acceso usando Client Credentials Flow
   async getAccessToken(): Promise<string> {
     if (this.accessToken && Date.now() < this.tokenExpiry) {
+      console.log('🔑 Usando token de acceso existente')
       return this.accessToken
     }
 
+    console.log('🔑 Obteniendo nuevo token de acceso...')
+    console.log('🔗 Client ID:', SPOTIFY_CONFIG.CLIENT_ID?.slice(0, 5) + '...')
+    console.log('🔗 Client Secret:', SPOTIFY_CONFIG.CLIENT_SECRET ? 'Configurado' : 'No configurado')
+    
     const response = await fetch(SPOTIFY_CONFIG.TOKEN_ENDPOINT, {
       method: 'POST',
       headers: {
@@ -63,11 +68,17 @@ class SpotifyService {
       body: 'grant_type=client_credentials'
     })
 
+    console.log('🌐 Respuesta del token:', response.status, response.statusText)
+    
     if (!response.ok) {
-      throw new Error('Failed to get Spotify access token')
+      const errorText = await response.text()
+      console.error('❌ Error obteniendo token:', errorText)
+      throw new Error(`Failed to get Spotify access token: ${response.status} ${response.statusText}`)
     }
 
     const data: SpotifyTokenResponse = await response.json()
+    console.log('✅ Token obtenido exitosamente, expira en:', data.expires_in, 'segundos')
+    
     this.accessToken = data.access_token
     this.tokenExpiry = Date.now() + (data.expires_in * 1000) - 60000 // 1 minuto antes
 
@@ -76,11 +87,15 @@ class SpotifyService {
 
   // Buscar canciones populares por género
   async getRandomTracks(genre: string = 'pop', limit: number = 50): Promise<SpotifyTrack[]> {
+    console.log('🎯 Buscando canciones...', { genre, limit })
+    
     const token = await this.getAccessToken()
     
     // Usar búsqueda con filtros para obtener canciones populares
     const query = `genre:${genre} year:2020-2024`
     const url = `${SPOTIFY_CONFIG.API_BASE_URL}/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}&market=ES`
+    
+    console.log('🔍 URL de búsqueda:', url)
 
     const response = await fetch(url, {
       headers: {
@@ -88,14 +103,23 @@ class SpotifyService {
       }
     })
 
+    console.log('📊 Respuesta de búsqueda:', response.status, response.statusText)
+    
     if (!response.ok) {
-      throw new Error('Failed to fetch tracks from Spotify')
+      const errorText = await response.text()
+      console.error('❌ Error en búsqueda:', errorText)
+      throw new Error(`Failed to fetch tracks from Spotify: ${response.status}`)
     }
 
     const data: SpotifySearchResponse = await response.json()
+    console.log('📋 Canciones encontradas:', data.tracks.items.length)
+    console.log('🎵 Canciones con preview:', data.tracks.items.filter(track => track.preview_url !== null).length)
     
     // Filtrar solo canciones con preview_url
-    return data.tracks.items.filter(track => track.preview_url !== null)
+    const tracksWithPreview = data.tracks.items.filter(track => track.preview_url !== null)
+    console.log('✅ Canciones válidas (con preview):', tracksWithPreview.length)
+    
+    return tracksWithPreview
   }
 
   // Obtener canciones de una playlist específica (para mejor calidad de juego)
