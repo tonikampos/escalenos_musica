@@ -42,109 +42,70 @@ export const useGameState = () => {
     setGameState(prev => ({ ...prev, isLoading: true }))
     let songs: Song[] = []
     try {
-      if (musicSource === 'spotify') {
-        const spotifyTracks = await spotifyService.getRandomTracks(category, 10)
-        songs = spotifyTracks
-          .filter(track => !!track.preview_url)
-          .map(track => ({
+      // Queries para indie español y grupos gallegos
+      const queries = [
+        'indie español',
+        'indie spain',
+        'spanish indie',
+        'indie rock español',
+        'indie pop español',
+        'música independiente española',
+        'grupos gallegos',
+        'música gallega',
+        'banda gallega',
+        'grupo gallego',
+        'pop gallego',
+        'rock gallego',
+        'indie gallego',
+        'folk gallego'
+      ];
+      let allSongs: Song[] = [];
+      for (const q of queries) {
+        let found: Song[] = [];
+        if (musicSource === 'spotify') {
+          const spotifyTracks = await spotifyService.getRandomTracks(q, 10);
+          found = spotifyTracks
+            .filter(track => !!track.preview_url)
+            .map(track => ({
+              id: track.id,
+              title: track.name,
+              artist: track.artists[0]?.name || '',
+              previewUrl: track.preview_url || '',
+              albumCover: track.album.images[0]?.url || ''
+            }));
+        } else if (musicSource === 'youtube') {
+          const youtubeTracks = await youtubeMusicService.searchByCategory(q, 10);
+          found = youtubeTracks.map(track => ({
             id: track.id,
-            title: track.name,
-            artist: track.artists[0]?.name || '',
-            previewUrl: track.preview_url || '',
-            albumCover: track.album.images[0]?.url || ''
-          }))
-      } else if (musicSource === 'youtube') {
-        const youtubeTracks = await youtubeMusicService.searchByCategory(category, 10)
-        songs = youtubeTracks.map(track => ({
-          id: track.id,
-          title: track.title,
-          artist: track.artist,
-          previewUrl: track.audioUrl || '',
-          albumCover: track.thumbnailUrl || ''
-        }))
-      } else if (musicSource === 'deezer') {
-        songs = await deezerService.searchTracks(category, 10)
-      }
-
-      // Filtrar duplicados
-      songs = songs.filter(song => song.previewUrl)
-      songs = songs.filter((song, idx, arr) =>
-        arr.findIndex(s => s.title.toLowerCase() === song.title.toLowerCase() && s.artist.toLowerCase() === song.artist.toLowerCase()) === idx
-      )
-
-      if (songs.length < 4) {
-        throw new Error('Non se encontraron cancións suficientes en la fuente seleccionada')
-      }
-
-      const shuffledSongs = songs.sort(() => Math.random() - 0.5)
-      setAvailableSongs(shuffledSongs)
-      localStorage.setItem('musicguess-songs-cache', JSON.stringify(shuffledSongs))
-      localStorage.setItem('musicguess-cache-timestamp', Date.now().toString())
-      console.log(`✅ ${shuffledSongs.length} cancións cargadas de ${musicSource}`)
-    } catch (error) {
-      // Fallback: canciones de ejemplo
-      console.error('❌ Error cargando cancións:', error)
-      const fallbackSongs: Song[] = [
-        {
-          id: 'sample1',
-          title: 'Blinding Lights',
-          artist: 'The Weeknd',
-          previewUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b27396ca2b2ac0e4ad5e2f8c4c10'
-        },
-        {
-          id: 'sample2',
-          title: 'Shape of You',
-          artist: 'Ed Sheeran',
-          previewUrl: 'https://sample-videos.com/zip/10/mp3/mp3-15s/SampleAudio_0.4mb_mp3.mp3',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96'
-        },
-        {
-          id: 'sample3',
-          title: 'Bad Guy',
-          artist: 'Billie Eilish',
-          previewUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b273a8cc2d73b5ddaa5e8b2e7b9f'
-        },
-        {
-          id: 'sample4',
-          title: 'Watermelon Sugar',
-          artist: 'Harry Styles',
-          previewUrl: 'https://sample-videos.com/zip/10/mp3/mp3-15s/SampleAudio_0.4mb_mp3.mp3',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b273adce9b0e8b889f4d8f1aa'
-        },
-        {
-          id: 'sample5',
-          title: 'Levitating',
-          artist: 'Dua Lipa',
-          previewUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b273c1b7dc6c6a8b4e6e88a2a7d4'
-        },
-        {
-          id: 'sample6',
-          title: 'Stay',
-          artist: 'The Kid LAROI & Justin Bieber',
-          previewUrl: 'https://sample-videos.com/zip/10/mp3/mp3-15s/SampleAudio_0.4mb_mp3.mp3',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b273b1b7dc6c6a8b4e6e88a2a7d4'
-        },
-        {
-          id: 'sample7',
-          title: 'Peaches',
-          artist: 'Justin Bieber',
-          previewUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b273a1b7dc6c6a8b4e6e88a2a7d4'
-        },
-        {
-          id: 'sample8',
-          title: 'Good 4 U',
-          artist: 'Olivia Rodrigo',
-          previewUrl: 'https://sample-videos.com/zip/10/mp3/mp3-15s/SampleAudio_0.4mb_mp3.mp3',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b27391b7dc6c6a8b4e6e88a2a7d4'
+            title: track.title,
+            artist: track.artist,
+            previewUrl: track.audioUrl || '',
+            albumCover: track.thumbnailUrl || ''
+          }));
+        } else if (musicSource === 'deezer') {
+          found = await deezerService.searchTracks(q, 10);
         }
-      ]
-      setAvailableSongs(fallbackSongs)
+        allSongs = allSongs.concat(found);
+      }
+      // Filtrar duplicados y previews vacíos
+      allSongs = allSongs.filter(song => song.previewUrl);
+      allSongs = allSongs.filter((song, idx, arr) =>
+        arr.findIndex(s => s.title.toLowerCase() === song.title.toLowerCase() && s.artist.toLowerCase() === song.artist.toLowerCase()) === idx
+      );
+      if (allSongs.length < 4) {
+        throw new Error('Non se encontraron cancións suficientes en la fuente seleccionada');
+      }
+      const shuffledSongs = allSongs.sort(() => Math.random() - 0.5);
+      setAvailableSongs(shuffledSongs);
+      localStorage.setItem('musicguess-songs-cache', JSON.stringify(shuffledSongs));
+      localStorage.setItem('musicguess-cache-timestamp', Date.now().toString());
+      console.log(`✅ ${shuffledSongs.length} cancións cargadas de ${musicSource}`);
+    } catch (error) {
+      // No fallback, solo error
+      console.error('❌ Error cargando cancións:', error);
+      setAvailableSongs([]);
     }
-    setGameState(prev => ({ ...prev, isLoading: false }))
+    setGameState(prev => ({ ...prev, isLoading: false }));
   }, [musicSource])
   // Permitir cambiar la fuente de música desde el exterior
   const setMusicSourceExternal = (source: 'spotify' | 'youtube' | 'deezer') => {
