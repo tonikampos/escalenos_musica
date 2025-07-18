@@ -1,3 +1,13 @@
+        'QUEVEDO',
+        'Myke Towers',
+        'Beéle',
+        'Lucho RK',
+        'Kapo',
+        'Blackpink',
+        'Lola Indigo',
+        'Bad Bunny',
+        'Manuel Turizo',
+        'Karol G',
 import { useState, useCallback, useEffect } from 'react'
 import { Song, GameState, GameStats } from '../types/xogo'
 import { youtubeMusicService } from '../services/youtubeMusicService'
@@ -44,6 +54,11 @@ export const useGameState = () => {
     try {
       // Queries para indie español y grupos gallegos
       const queries = [
+        'Aitana',
+        'Manuel Carrasco',
+        'Sebastian Yatra',
+        'Morat',
+        'Vanesa Martin',
         'indie español',
         'indie spain',
         'spanish indie',
@@ -57,7 +72,33 @@ export const useGameState = () => {
         'pop gallego',
         'rock gallego',
         'indie gallego',
-        'folk gallego'
+        'folk gallego',
+        'Arde Bogota',
+        'Viva Suecia',
+        'Siloe',
+        'Sidonie',
+        'Shinova',
+        'Marlena',
+        'Heredeiros da Crus',
+        'Dakidarria',
+        'Miss Caffeina',
+        'Funambulista',
+        'Lori Meyers',
+        'La La Love You',
+        'Sexy Zebras',
+        'Mikel Izal',
+        'Fillas de Casandra',
+        'Lontreira',
+        'QUEVEDO',
+        'Myke Towers',
+        'Beéle',
+        'Lucho RK',
+        'Kapo',
+        'Blackpink',
+        'Lola Indigo',
+        'Bad Bunny',
+        'Manuel Turizo',
+        'Karol G'
       ];
       let allSongs: Song[] = [];
       for (const q of queries) {
