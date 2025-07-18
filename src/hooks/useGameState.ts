@@ -1,172 +1,122 @@
 import { useState, useCallback, useEffect } from 'react'
-import { SpotifyTrack, spotifyService } from '../services/spotifyService'
+import { Song, GameState, GameStats } from '../types/xogo'
 
-export interface Song {
-  id: string
-  title: string
-  artist: string
-  previewUrl: string
-  albumCover: string
-  spotifyUrl?: string
-}
-
-export interface GameState {
-  currentSong: Song | null
-  options: Song[]
-  score: number
-  round: number
-  maxRounds: number
-  isPlaying: boolean
-  showAnswer: boolean
-  gameStarted: boolean
-  selectedAnswer: Song | null
-  isLoading: boolean
-  difficulty: 'easy' | 'medium' | 'hard'
-  category: string
-}
-
-export interface GameStats {
-  totalGames: number
-  bestScore: number
-  averageScore: number
-  correctAnswers: number
-  totalAnswers: number
-}
-
+// Estado inicial del juego
 const INITIAL_STATE: GameState = {
+  gameStarted: false,
   currentSong: null,
   options: [],
+  selectedAnswer: null,
+  showAnswer: false,
   score: 0,
-  round: 0,
+  round: 1,
   maxRounds: 10,
   isPlaying: false,
-  showAnswer: false,
-  gameStarted: false,
-  selectedAnswer: null,
   isLoading: false,
   difficulty: 'medium',
   category: 'pop'
 }
 
-// Convertir SpotifyTrack a Song
-const convertSpotifyTrack = (track: SpotifyTrack): Song => ({
-  id: track.id,
-  title: track.name,
-  artist: track.artists.map(a => a.name).join(', '),
-  previewUrl: track.preview_url || '',
-  albumCover: track.album.images[0]?.url || 'https://via.placeholder.com/300x300/1DB954/ffffff?text=🎵',
-  spotifyUrl: track.external_urls.spotify
-})
+// Estadísticas iniciales
+const INITIAL_STATS: GameStats = {
+  totalGames: 0,
+  bestScore: 0,
+  averageScore: 0,
+  correctAnswers: 0,
+  totalAnswers: 0
+}
 
 export const useGameState = () => {
   const [gameState, setGameState] = useState<GameState>(INITIAL_STATE)
   const [availableSongs, setAvailableSongs] = useState<Song[]>([])
   const [stats, setStats] = useState<GameStats>(() => {
     const saved = localStorage.getItem('musicguess-stats')
-    return saved ? JSON.parse(saved) : {
-      totalGames: 0,
-      bestScore: 0,
-      averageScore: 0,
-      correctAnswers: 0,
-      totalAnswers: 0
-    }
+    return saved ? JSON.parse(saved) : INITIAL_STATS
   })
 
-  // Cargar canciones de Spotify
+  // Cargar canciones (solo ejemplos por ahora)
   const loadSongs = useCallback(async (category: string = 'pop') => {
     setGameState(prev => ({ ...prev, isLoading: true }))
     
-    try {
-      console.log('🎵 Cargando canciones de Spotify...', { category })
-      console.log('🔑 Client ID:', import.meta.env.VITE_SPOTIFY_CLIENT_ID?.slice(0, 5) + '...')
-      console.log('🔑 Client Secret:', import.meta.env.VITE_SPOTIFY_CLIENT_SECRET ? 'Configurado' : 'No configurado')
-      
-      let tracks: SpotifyTrack[] = []
-      
-      // Usar búsquedas por género
-      const genreMap = {
-        'pop': 'pop',
-        'hits': 'pop',
-        'rock': 'rock',
-        'latin': 'latin',
-        'electronic': 'electronic',
-        'indie': 'indie'
-      }
-      
-      const genre = genreMap[category as keyof typeof genreMap] || 'pop'
-      console.log('🔍 Buscando canciones del género:', genre)
-      
-      tracks = await spotifyService.getRandomTracks(genre, 50)
-      
-      console.log('📊 Canciones encontradas:', tracks.length)
-      
-      if (tracks.length === 0) {
-        console.log('🔄 No se encontraron canciones, intentando con pop...')
-        tracks = await spotifyService.getRandomTracks('pop', 50)
-      }
-
-      console.log('📊 Canciones obtenidas de Spotify:', tracks.length)
-      console.log('📋 Primeras 3 canciones:', tracks.slice(0, 3).map(t => ({ title: t.name, artist: t.artists[0]?.name, hasPreview: !!t.preview_url })))
-
-      const songs = tracks.map(convertSpotifyTrack)
-      console.log('✅ Canciones convertidas:', songs.length)
-      console.log('🎵 Canciones con preview:', songs.filter(s => s.previewUrl).length)
-      
-      setAvailableSongs(songs)
-      
-    } catch (error) {
-      console.error('❌ Error loading songs from Spotify:', error)
-      
-      // Fallback a canciones de ejemplo si Spotify falla
-      console.log('🔄 Usando canciones de ejemplo...')
-      const fallbackSongs: Song[] = [
-        {
-          id: '1',
-          title: 'Blinding Lights',
-          artist: 'The Weeknd',
-          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-          albumCover: 'https://via.placeholder.com/300x300/1DB954/ffffff?text=🎵'
-        },
-        {
-          id: '2',
-          title: 'Shape of You',
-          artist: 'Ed Sheeran',
-          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-          albumCover: 'https://via.placeholder.com/300x300/FF6B6B/ffffff?text=🎤'
-        },
-        {
-          id: '3',
-          title: 'Bad Guy',
-          artist: 'Billie Eilish',
-          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-          albumCover: 'https://via.placeholder.com/300x300/4ECDC4/ffffff?text=🎶'
-        },
-        {
-          id: '4',
-          title: 'Watermelon Sugar',
-          artist: 'Harry Styles',
-          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-          albumCover: 'https://via.placeholder.com/300x300/45B7D1/ffffff?text=🍉'
-        },
-        {
-          id: '5',
-          title: 'Levitating',
-          artist: 'Dua Lipa',
-          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-          albumCover: 'https://via.placeholder.com/300x300/FF69B4/ffffff?text=💫'
-        },
-        {
-          id: '6',
-          title: 'Stay',
-          artist: 'The Kid LAROI & Justin Bieber',
-          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-          albumCover: 'https://via.placeholder.com/300x300/9B59B6/ffffff?text=🌟'
-        }
-      ]
-      console.log('📝 Canciones de ejemplo configuradas:', fallbackSongs.length)
-      setAvailableSongs(fallbackSongs)
-    }
+    console.log('🎵 SOLUCIÓN TEMPORAL: Usando canciones de ejemplo')
+    console.log('🎯 Categoría seleccionada:', category)
     
+    // Canciones de ejemplo con URLs de audio que funcionan
+    const exampleSongs: Song[] = [
+      {
+        id: '1',
+        title: 'Blinding Lights',
+        artist: 'The Weeknd',
+        previewUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
+        albumCover: 'https://i.scdn.co/image/ab67616d0000b27396ca2b2ac0e4ad5e2f8c4c10'
+      },
+      {
+        id: '2',
+        title: 'Shape of You',
+        artist: 'Ed Sheeran',
+        previewUrl: 'https://sample-videos.com/zip/10/mp3/mp3-15s/SampleAudio_0.4mb_mp3.mp3',
+        albumCover: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96'
+      },
+      {
+        id: '3',
+        title: 'Bad Guy',
+        artist: 'Billie Eilish',
+        previewUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
+        albumCover: 'https://i.scdn.co/image/ab67616d0000b273a8cc2d73b5ddaa5e8b2e7b9f'
+      },
+      {
+        id: '4',
+        title: 'Watermelon Sugar',
+        artist: 'Harry Styles',
+        previewUrl: 'https://sample-videos.com/zip/10/mp3/mp3-15s/SampleAudio_0.4mb_mp3.mp3',
+        albumCover: 'https://i.scdn.co/image/ab67616d0000b273adce9b0e8b889f4d8f1aa'
+      },
+      {
+        id: '5',
+        title: 'Levitating',
+        artist: 'Dua Lipa',
+        previewUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
+        albumCover: 'https://i.scdn.co/image/ab67616d0000b273c1b7dc6c6a8b4e6e88a2a7d4'
+      },
+      {
+        id: '6',
+        title: 'Stay',
+        artist: 'The Kid LAROI & Justin Bieber',
+        previewUrl: 'https://sample-videos.com/zip/10/mp3/mp3-15s/SampleAudio_0.4mb_mp3.mp3',
+        albumCover: 'https://i.scdn.co/image/ab67616d0000b273b1b7dc6c6a8b4e6e88a2a7d4'
+      },
+      {
+        id: '7',
+        title: 'Peaches',
+        artist: 'Justin Bieber',
+        previewUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
+        albumCover: 'https://i.scdn.co/image/ab67616d0000b273a1b7dc6c6a8b4e6e88a2a7d4'
+      },
+      {
+        id: '8',
+        title: 'Good 4 U',
+        artist: 'Olivia Rodrigo',
+        previewUrl: 'https://sample-videos.com/zip/10/mp3/mp3-15s/SampleAudio_0.4mb_mp3.mp3',
+        albumCover: 'https://i.scdn.co/image/ab67616d0000b27391b7dc6c6a8b4e6e88a2a7d4'
+      },
+      {
+        id: '9',
+        title: 'Industry Baby',
+        artist: 'Lil Nas X',
+        previewUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
+        albumCover: 'https://i.scdn.co/image/ab67616d0000b27381b7dc6c6a8b4e6e88a2a7d4'
+      },
+      {
+        id: '10',
+        title: 'Heat Waves',
+        artist: 'Glass Animals',
+        previewUrl: 'https://sample-videos.com/zip/10/mp3/mp3-15s/SampleAudio_0.4mb_mp3.mp3',
+        albumCover: 'https://i.scdn.co/image/ab67616d0000b27371b7dc6c6a8b4e6e88a2a7d4'
+      }
+    ]
+    
+    console.log('✅ Canciones de ejemplo cargadas:', exampleSongs.length)
+    setAvailableSongs(exampleSongs)
     setGameState(prev => ({ ...prev, isLoading: false }))
   }, [])
 
@@ -216,17 +166,16 @@ export const useGameState = () => {
         totalAnswers: stats.totalAnswers + gameState.maxRounds,
         averageScore: Math.round(((stats.averageScore * stats.totalGames) + gameState.score) / (stats.totalGames + 1))
       }
+      
       setStats(newStats)
       localStorage.setItem('musicguess-stats', JSON.stringify(newStats))
       
-      setGameState(prev => ({
-        ...prev,
-        gameStarted: false,
-        showAnswer: false
-      }))
+      // Resetear el juego
+      setGameState(INITIAL_STATE)
       return
     }
 
+    // Siguiente ronda
     const songs = availableSongs
     const randomSong = songs[Math.floor(Math.random() * songs.length)]
     const wrongOptions = songs
@@ -240,33 +189,34 @@ export const useGameState = () => {
       ...prev,
       currentSong: randomSong,
       options: shuffledOptions,
-      round: prev.round + 1,
+      selectedAnswer: null,
       showAnswer: false,
-      isPlaying: false,
-      selectedAnswer: null
+      round: prev.round + 1,
+      isPlaying: false
     }))
-  }, [gameState.round, gameState.maxRounds, gameState.score, availableSongs, stats])
+  }, [gameState.round, gameState.maxRounds, gameState.score, stats, availableSongs])
 
   // Seleccionar respuesta
   const selectAnswer = useCallback((selectedSong: Song) => {
     if (gameState.showAnswer) return
-
+    
     const isCorrect = selectedSong.id === gameState.currentSong?.id
     
     setGameState(prev => ({
       ...prev,
-      score: isCorrect ? prev.score + 1 : prev.score,
+      selectedAnswer: selectedSong,
       showAnswer: true,
-      selectedAnswer: selectedSong
+      score: isCorrect ? prev.score + 1 : prev.score,
+      isPlaying: false
     }))
-  }, [gameState.showAnswer, gameState.currentSong])
+  }, [gameState.showAnswer, gameState.currentSong?.id])
 
-  // Reiniciar juego
+  // Resetear juego
   const resetGame = useCallback(() => {
     setGameState(INITIAL_STATE)
   }, [])
 
-  // Controlar reproducción
+  // Alternar reproducción
   const togglePlayback = useCallback(() => {
     setGameState(prev => ({
       ...prev,
@@ -274,20 +224,21 @@ export const useGameState = () => {
     }))
   }, [])
 
-  // Cambiar configuración
+  // Actualizar configuración
   const updateSettings = useCallback((difficulty: 'easy' | 'medium' | 'hard', category: string) => {
     setGameState(prev => ({
       ...prev,
       difficulty,
       category
     }))
-    loadSongs(category)
-  }, [loadSongs])
+  }, [])
 
   // Cargar canciones al montar el componente
   useEffect(() => {
-    loadSongs()
-  }, [loadSongs])
+    if (availableSongs.length === 0) {
+      loadSongs('pop')
+    }
+  }, [availableSongs.length, loadSongs])
 
   return {
     gameState,
