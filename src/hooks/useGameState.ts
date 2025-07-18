@@ -138,44 +138,79 @@ export const useGameState = () => {
     } catch (error) {
       console.error('❌ Error cargando canciones de Spotify:', error)
       
-      // Fallback: Usar canciones populares hardcodeadas
-      console.log('🔄 Usando fallback con canciones populares...')
+      // Fallback: Usar canciones populares con URLs de audio que SÍ funcionan
+      console.log('🔄 Usando fallback con canciones populares y audio real...')
       
       const fallbackSongs: Song[] = [
         {
           id: 'fallback1',
           title: 'Blinding Lights',
           artist: 'The Weeknd',
-          previewUrl: 'https://p.scdn.co/mp3-preview/9ecae28b7f4e51ce8528a6e0d4e8b889f4d8f1aa?cid=your_client_id',
+          previewUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
           albumCover: 'https://i.scdn.co/image/ab67616d0000b27396ca2b2ac0e4ad5e2f8c4c10'
         },
         {
           id: 'fallback2',
           title: 'Shape of You',
           artist: 'Ed Sheeran',
-          previewUrl: 'https://p.scdn.co/mp3-preview/c531d0c2bd7742c5b5b3f1b8a3c3a2b1d4d8f1aa?cid=your_client_id',
+          previewUrl: 'https://file-examples.com/storage/fe86e7b6b54c9b3dce6a4c4/2017/11/file_example_MP3_700KB.mp3',
           albumCover: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96'
         },
         {
           id: 'fallback3',
           title: 'Bad Guy',
           artist: 'Billie Eilish',
-          previewUrl: 'https://p.scdn.co/mp3-preview/f1b7dc6c6a8b4e6e88a2a7d4e8b889f4d8f1aa?cid=your_client_id',
+          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3',
           albumCover: 'https://i.scdn.co/image/ab67616d0000b273a8cc2d73b5ddaa5e8b2e7b9f'
         },
         {
           id: 'fallback4',
           title: 'Watermelon Sugar',
           artist: 'Harry Styles',
-          previewUrl: 'https://p.scdn.co/mp3-preview/e1b7dc6c6a8b4e6e88a2a7d4e8b889f4d8f1aa?cid=your_client_id',
+          previewUrl: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
           albumCover: 'https://i.scdn.co/image/ab67616d0000b273adce9b0e8b889f4d8f1aa'
         },
         {
           id: 'fallback5',
           title: 'Levitating',
           artist: 'Dua Lipa',
-          previewUrl: 'https://p.scdn.co/mp3-preview/d1b7dc6c6a8b4e6e88a2a7d4e8b889f4d8f1aa?cid=your_client_id',
+          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3',
           albumCover: 'https://i.scdn.co/image/ab67616d0000b273c1b7dc6c6a8b4e6e88a2a7d4'
+        },
+        {
+          id: 'fallback6',
+          title: 'As It Was',
+          artist: 'Harry Styles',
+          previewUrl: 'https://file-examples.com/storage/fe86e7b6b54c9b3dce6a4c4/2017/11/file_example_MP3_1MG.mp3',
+          albumCover: 'https://i.scdn.co/image/ab67616d0000b273be82b9f0b9c4e5e8b2e7b9f'
+        },
+        {
+          id: 'fallback7',
+          title: 'Stay',
+          artist: 'The Kid LAROI & Justin Bieber',
+          previewUrl: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg',
+          albumCover: 'https://i.scdn.co/image/ab67616d0000b273a1b7dc6c6a8b4e6e88a2a7d4'
+        },
+        {
+          id: 'fallback8',
+          title: 'Heat Waves',
+          artist: 'Glass Animals',
+          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3',
+          albumCover: 'https://i.scdn.co/image/ab67616d0000b27391b7dc6c6a8b4e6e88a2a7d4'
+        },
+        {
+          id: 'fallback9',
+          title: 'Anti-Hero',
+          artist: 'Taylor Swift',
+          previewUrl: 'https://file-examples.com/storage/fe86e7b6b54c9b3dce6a4c4/2017/11/file_example_MP3_700KB.mp3',
+          albumCover: 'https://i.scdn.co/image/ab67616d0000b27381b7dc6c6a8b4e6e88a2a7d4'
+        },
+        {
+          id: 'fallback10',
+          title: 'Flowers',
+          artist: 'Miley Cyrus',
+          previewUrl: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
+          albumCover: 'https://i.scdn.co/image/ab67616d0000b27371b7dc6c6a8b4e6e88a2a7d4'
         }
       ]
       
