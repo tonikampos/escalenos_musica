@@ -146,6 +146,20 @@ export const useGameState = () => {
           artist: 'Harry Styles',
           previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
           albumCover: 'https://via.placeholder.com/300x300/45B7D1/ffffff?text=🍉'
+        },
+        {
+          id: '5',
+          title: 'Levitating',
+          artist: 'Dua Lipa',
+          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
+          albumCover: 'https://via.placeholder.com/300x300/FF69B4/ffffff?text=💫'
+        },
+        {
+          id: '6',
+          title: 'Stay',
+          artist: 'The Kid LAROI & Justin Bieber',
+          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
+          albumCover: 'https://via.placeholder.com/300x300/9B59B6/ffffff?text=🌟'
         }
       ]
       console.log('📝 Canciones de ejemplo configuradas:', fallbackSongs.length)
