@@ -124,9 +124,12 @@ class SpotifyService {
 
   // Obtener canciones de una playlist específica (para mejor calidad de juego)
   async getPlaylistTracks(playlistId: string): Promise<SpotifyTrack[]> {
+    console.log('🎵 Obteniendo canciones de playlist:', playlistId)
+    
     const token = await this.getAccessToken()
     
     const url = `${SPOTIFY_CONFIG.API_BASE_URL}/playlists/${playlistId}/tracks?market=ES&limit=50`
+    console.log('🔗 URL de playlist:', url)
 
     const response = await fetch(url, {
       headers: {
@@ -134,16 +137,31 @@ class SpotifyService {
       }
     })
 
+    console.log('📊 Respuesta de playlist:', response.status, response.statusText)
+    
     if (!response.ok) {
-      throw new Error('Failed to fetch playlist tracks')
+      const errorText = await response.text()
+      console.error('❌ Error obteniendo playlist:', errorText)
+      throw new Error(`Failed to fetch playlist tracks: ${response.status}`)
     }
 
     const data = await response.json()
+    console.log('📋 Items en playlist:', data.items?.length || 0)
     
     // Extraer tracks y filtrar los que tienen preview
-    return data.items
+    const tracks = data.items
       .map((item: any) => item.track)
       .filter((track: SpotifyTrack) => track && track.preview_url !== null)
+    
+    console.log('🎵 Canciones con preview en playlist:', tracks.length)
+    console.log('📋 Primeras 3 canciones de playlist:', tracks.slice(0, 3).map((t: SpotifyTrack) => ({ 
+      title: t.name, 
+      artist: t.artists?.[0]?.name,
+      hasPreview: !!t.preview_url,
+      previewUrl: t.preview_url?.substring(0, 50) + '...'
+    })))
+    
+    return tracks
   }
 
   // Buscar canciones por categoría/estado de ánimo

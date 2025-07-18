@@ -89,18 +89,18 @@ export const useGameState = () => {
         console.log('🎯 Intentando cargar Top 50 Global...')
         tracks = await spotifyService.getPlaylistTracks('37i9dQZEVXbMDoHDwVN2tF')
       } else if (category === 'rock') {
-        console.log('🎸 Intentando cargar canciones de rock...')
-        tracks = await spotifyService.getRandomTracks('rock', 50)
+        console.log('🎸 Intentando cargar Rock This...')
+        tracks = await spotifyService.getPlaylistTracks('37i9dQZF1DWXRqgorJj26U')
       } else if (category === 'latin') {
-        console.log('🎺 Intentando cargar canciones latinas...')
-        tracks = await spotifyService.getRandomTracks('latin', 50)
+        console.log('🎺 Intentando cargar ¡Viva Latino!...')
+        tracks = await spotifyService.getPlaylistTracks('37i9dQZF1DX10zKzsJ2jva')
       } else if (category === 'electronic') {
-        console.log('🎹 Intentando cargar música electrónica...')
-        tracks = await spotifyService.getRandomTracks('electronic', 50)
+        console.log('🎹 Intentando cargar Electronic Dance...')
+        tracks = await spotifyService.getPlaylistTracks('37i9dQZF1DX0XUsuxWHRQd')
       } else {
-        // Por defecto, canciones populares
-        console.log('🎤 Intentando cargar canciones pop...')
-        tracks = await spotifyService.getRandomTracks('pop', 50)
+        // Por defecto, Today's Top Hits
+        console.log('🎤 Intentando cargar Today\'s Top Hits...')
+        tracks = await spotifyService.getPlaylistTracks('37i9dQZF1DXcBWIGoYBM5M')
       }
 
       console.log('📊 Canciones obtenidas de Spotify:', tracks.length)
