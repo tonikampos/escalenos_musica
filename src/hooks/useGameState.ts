@@ -274,7 +274,7 @@ export const useGameState = () => {
       showAnswer: false,
       score: newScore,
       round: prev.round + 1,
-      isPlaying: false
+      isPlaying: true // ✅ Reproducir automáticamente la siguiente canción
     }))
   }, [gameState, availableSongs])
 

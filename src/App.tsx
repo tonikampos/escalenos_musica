@@ -267,14 +267,14 @@ function App() {
           </button>
         </div>
 
-        {/* Reproductor de YouTube embebido */}
+        {/* Reproductor de YouTube embebido (oculto para no dar pistas) */}
         {gameState.isPlaying && gameState.currentSong && isYouTubeUrl(gameState.currentSong.previewUrl) && (
           <div className="mb-6">
             <iframe
               src={gameState.currentSong.previewUrl}
               width="100%"
               height="200"
-              className="rounded-xl"
+              className="rounded-xl opacity-0 pointer-events-none absolute -z-10"
               allow="autoplay; encrypted-media"
               allowFullScreen
             />
