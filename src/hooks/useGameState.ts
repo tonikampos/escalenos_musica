@@ -83,24 +83,25 @@ export const useGameState = () => {
       
       let tracks: SpotifyTrack[] = []
       
-      // Intentar diferentes fuentes según la categoría
-      if (category === 'hits') {
-        // Playlist de Top 50 Global de Spotify
-        console.log('🎯 Intentando cargar Top 50 Global...')
-        tracks = await spotifyService.getPlaylistTracks('37i9dQZEVXbMDoHDwVN2tF')
-      } else if (category === 'rock') {
-        console.log('🎸 Intentando cargar Rock This...')
-        tracks = await spotifyService.getPlaylistTracks('37i9dQZF1DWXRqgorJj26U')
-      } else if (category === 'latin') {
-        console.log('🎺 Intentando cargar ¡Viva Latino!...')
-        tracks = await spotifyService.getPlaylistTracks('37i9dQZF1DX10zKzsJ2jva')
-      } else if (category === 'electronic') {
-        console.log('🎹 Intentando cargar Electronic Dance...')
-        tracks = await spotifyService.getPlaylistTracks('37i9dQZF1DX0XUsuxWHRQd')
-      } else {
-        // Por defecto, Today's Top Hits
-        console.log('🎤 Intentando cargar Today\'s Top Hits...')
-        tracks = await spotifyService.getPlaylistTracks('37i9dQZF1DXcBWIGoYBM5M')
+      // Usar búsquedas por género
+      const genreMap = {
+        'pop': 'pop',
+        'hits': 'pop',
+        'rock': 'rock',
+        'latin': 'latin',
+        'electronic': 'electronic'
+      }
+      
+      const genre = genreMap[category as keyof typeof genreMap] || 'pop'
+      console.log('🔍 Buscando canciones del género:', genre)
+      
+      tracks = await spotifyService.getRandomTracks(genre, 50)
+      
+      console.log('📊 Canciones encontradas:', tracks.length)
+      
+      if (tracks.length === 0) {
+        console.log('🔄 No se encontraron canciones, intentando con pop...')
+        tracks = await spotifyService.getRandomTracks('pop', 50)
       }
 
       console.log('📊 Canciones obtenidas de Spotify:', tracks.length)
