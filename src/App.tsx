@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
-import { Music, Play, Pause, Volume2, RotateCcw, Star, Settings, Trophy } from 'lucide-react'
+import { useState } from 'react'
+import { Music, RotateCcw, Star, Settings, Trophy } from 'lucide-react'
 import { useGameState } from './hooks/useGameState'
+import { AudioPlayer } from './components/AudioPlayer'
 
 function App() {
   const {
@@ -14,6 +15,23 @@ function App() {
     togglePlayback,
     updateSettings
   } = useGameState()
+
+  const [showSettings, setShowSettings] = useState(false)
+  const [showStats, setShowStats] = useState(false)
+
+  const handleAnswerSelect = (answer: string) => {
+    selectAnswer(answer)
+    
+    setTimeout(() => {
+      if (gameState.currentRound < gameState.totalRounds) {
+        nextRound()
+      }
+    }, 2000)
+  }
+
+  const handleTogglePlay = () => {
+    togglePlayback()
+  }
 
   const audioRef = useRef<HTMLAudioElement>(null)
   const [audioEnabled, setAudioEnabled] = useState(false)
@@ -235,72 +253,13 @@ function App() {
 
       {/* Reproductor de música */}
       <div className="music-card text-center mb-8">
-        <div className="mb-6">
-          {gameState.currentSong?.albumCover ? (
-            <div className="w-32 h-32 mx-auto mb-4 rounded-2xl overflow-hidden">
-              <img 
-                src={gameState.currentSong.albumCover} 
-                alt="Album cover"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ) : (
-            <div className="w-32 h-32 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-spotify-green to-green-600 flex items-center justify-center">
-              {gameState.isPlaying ? (
-                <div className="flex items-end space-x-1">
-                  <div className="equalizer-bar w-2 bg-white rounded-full"></div>
-                  <div className="equalizer-bar w-2 bg-white rounded-full"></div>
-                  <div className="equalizer-bar w-2 bg-white rounded-full"></div>
-                  <div className="equalizer-bar w-2 bg-white rounded-full"></div>
-                </div>
-              ) : (
-                <Music className="w-16 h-16 text-white" />
-              )}
-            </div>
-          )}
-          
-          <button 
-            onClick={togglePlayback}
-            className="button-primary"
-          >
-            {gameState.isPlaying ? (
-              <Pause className="w-5 h-5 mr-2" />
-            ) : (
-              <Play className="w-5 h-5 mr-2" />
-            )}
-            {gameState.isPlaying ? 'Pausar' : 'Reproducir'}
-          </button>
-
-          {/* Botón de activar audio si es necesario */}
-          {!audioEnabled && (
-            <button 
-              onClick={enableAudio}
-              className="button-secondary text-sm"
-            >
-              🔊 Activar Audio
-            </button>
-          )}
-        </div>
-
-        {gameState.isPlaying && (
-          <div className="text-sm text-gray-300">
-            Reproduciendo... 10 segundos
-          </div>
-        )}
-
-        {/* Debug info - mostrar URL del audio */}
-        {gameState.currentSong && (
-          <div className="mt-4 text-xs text-gray-400 text-center">
-            <details>
-              <summary className="cursor-pointer">🔧 Debug Info</summary>
-              <div className="mt-2 p-2 bg-black/20 rounded text-left">
-                <div>URL: {gameState.currentSong.previewUrl}</div>
-                <div>Audio habilitado: {audioEnabled ? '✅' : '❌'}</div>
-                <div>Estado: {gameState.isPlaying ? 'Reproduciendo' : 'Pausado'}</div>
-              </div>
-            </details>
-          </div>
-        )}
+        <AudioPlayer
+          audioUrl={gameState.currentSong?.previewUrl || ''}
+          isGamePlaying={gameState.isPlaying}
+          onTogglePlay={handleTogglePlay}
+          albumCover={gameState.currentSong?.albumCover}
+          maxDuration={10}
+        />
       </div>
 
       {/* Opciones de respuesta */}
