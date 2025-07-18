@@ -117,12 +117,11 @@ function App() {
                   onChange={(e) => updateCategory(e.target.value)}
                   className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white"
                 >
-                  <option value="pop">Pop</option>
-                  <option value="hits">Top Hits</option>
-                  <option value="indie">Indie Español</option>
-                  <option value="rock">Rock</option>
-                  <option value="latin">Latino</option>
-                  <option value="electronic">Electrónica</option>
+                  <option value="pop">🎵 Pop</option>
+                  <option value="rock">🎸 Rock</option>
+                  <option value="indie">🎼 Indie</option>
+                  <option value="galega">🎻 Galega</option>
+                  <option value="grandes-exitos">🌟 Grandes Éxitos Internacionales</option>
                 </select>
               </div>
             </div>
