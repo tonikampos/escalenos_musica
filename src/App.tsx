@@ -86,8 +86,8 @@ function App() {
           {/* Mensaje si no hay previews en la fuente seleccionada */}
           {noSongsAvailable && (
             <div className="mb-6 p-4 rounded-xl bg-red-100 text-red-700 text-sm">
-              No se encontraron previews de canciones en la fuente seleccionada (<b>{musicSource.charAt(0).toUpperCase() + musicSource.slice(1)}</b>).<br />
-              Prueba cambiando a otra fuente (Spotify, YouTube o Deezer) para más variedad de previews.
+              <strong>No se encontraron previews de canciones en la fuente seleccionada ({musicSource.charAt(0).toUpperCase() + musicSource.slice(1)}).</strong>
+              <div>Prueba cambiando a otra fuente (Spotify, YouTube o Deezer) para más variedad de previews.</div>
             </div>
           )}
 
