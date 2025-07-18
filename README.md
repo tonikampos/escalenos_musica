@@ -96,9 +96,16 @@ La aplicación usará automáticamente:
 
 1. **Configura el juego**: Elige la dificultad
 2. **Presiona "Empezar a jugar"**: La aplicación cargará canciones usando Last.fm
-3. **Escucha**: Presiona reproducir para escuchar 20 segundos de la canción
+3. **Escucha**: Presiona "Abrir en YouTube" para escuchar la canción en una nueva ventana
 4. **Adivina**: Selecciona la respuesta correcta entre las 4 opciones
 5. **Continúa**: Completa todas las rondas y ve tu puntuación final
+
+## 🎵 Nota sobre el Audio
+
+Debido a las restricciones de las APIs de audio, la aplicación:
+- **Obtiene metadatos reales** de canciones desde Last.fm
+- **Abre YouTube** en una nueva ventana para reproducir las canciones
+- **Mantiene el juego funcionando** con canciones reales de tus artistas favoritos
 
 ## 🎵 Artistas Incluidos
 
