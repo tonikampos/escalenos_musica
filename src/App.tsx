@@ -1,7 +1,6 @@
-import { useState } from 'react'
-import { Music, RotateCcw, Star, Settings, Trophy } from 'lucide-react'
+import { useEffect, useRef } from 'react'
+import { Music, Play, Pause, Volume2, RotateCcw, Star, Settings, Trophy } from 'lucide-react'
 import { useGameState } from './hooks/useGameState'
-import { AudioPlayer } from './components/AudioPlayer'
 
 function App() {
   const {
@@ -16,73 +15,24 @@ function App() {
     updateSettings
   } = useGameState()
 
-  const [showSettings, setShowSettings] = useState(false)
-  const [showStats, setShowStats] = useState(false)
-
-  const handleAnswerSelect = (answer: string) => {
-    selectAnswer(answer)
-    
-    setTimeout(() => {
-      if (gameState.currentRound < gameState.totalRounds) {
-        nextRound()
-      }
-    }, 2000)
-  }
-
-  const handleTogglePlay = () => {
-    togglePlayback()
-  }
-
   const audioRef = useRef<HTMLAudioElement>(null)
-  const [audioEnabled, setAudioEnabled] = useState(false)
-
-  // Función para activar el audio (necesaria para algunos navegadores)
-  const enableAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.muted = false
-      audioRef.current.volume = 0.7
-      setAudioEnabled(true)
-      
-      // Reproducir y pausar inmediatamente para "activar" el audio
-      audioRef.current.play().then(() => {
-        audioRef.current?.pause()
-      }).catch(console.error)
-    }
-  }
 
   // Manejar reproducción de audio
   useEffect(() => {
     if (audioRef.current && gameState.currentSong) {
       if (gameState.isPlaying) {
         audioRef.current.src = gameState.currentSong.previewUrl
-        audioRef.current.volume = 0.7 // Volumen al 70%
+        audioRef.current.play().catch(console.error)
         
-        // Intentar reproducir con manejo de errores
-        const playPromise = audioRef.current.play()
-        
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              console.log('Audio playing successfully')
-              // Pausar después de 10 segundos
-              const timer = setTimeout(() => {
-                if (audioRef.current) {
-                  audioRef.current.pause()
-                  togglePlayback()
-                }
-              }, 10000)
-              
-              return () => clearTimeout(timer)
-            })
-            .catch((error) => {
-              console.error('Error playing audio:', error)
-              // Si falla, intentar con interacción del usuario
-              if (error.name === 'NotAllowedError') {
-                alert('⚠️ Por favor, haz clic en el botón de reproducir para activar el audio')
-              }
-              togglePlayback()
-            })
-        }
+        // Pausar después de 10 segundos
+        const timer = setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.pause()
+            togglePlayback()
+          }
+        }, 10000)
+
+        return () => clearTimeout(timer)
       } else {
         audioRef.current.pause()
       }
@@ -253,13 +203,48 @@ function App() {
 
       {/* Reproductor de música */}
       <div className="music-card text-center mb-8">
-        <AudioPlayer
-          audioUrl={gameState.currentSong?.previewUrl || ''}
-          isGamePlaying={gameState.isPlaying}
-          onTogglePlay={handleTogglePlay}
-          albumCover={gameState.currentSong?.albumCover}
-          maxDuration={10}
-        />
+        <div className="mb-6">
+          {gameState.currentSong?.albumCover ? (
+            <div className="w-32 h-32 mx-auto mb-4 rounded-2xl overflow-hidden">
+              <img 
+                src={gameState.currentSong.albumCover} 
+                alt="Album cover"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="w-32 h-32 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-spotify-green to-green-600 flex items-center justify-center">
+              {gameState.isPlaying ? (
+                <div className="flex items-end space-x-1">
+                  <div className="equalizer-bar w-2 bg-white rounded-full"></div>
+                  <div className="equalizer-bar w-2 bg-white rounded-full"></div>
+                  <div className="equalizer-bar w-2 bg-white rounded-full"></div>
+                  <div className="equalizer-bar w-2 bg-white rounded-full"></div>
+                </div>
+              ) : (
+                <Music className="w-16 h-16 text-white" />
+              )}
+            </div>
+          )}
+          
+          <button 
+            onClick={togglePlayback}
+            className="button-primary"
+          >
+            {gameState.isPlaying ? (
+              <Pause className="w-5 h-5 mr-2" />
+            ) : (
+              <Play className="w-5 h-5 mr-2" />
+            )}
+            {gameState.isPlaying ? 'Pausar' : 'Reproducir'}
+          </button>
+        </div>
+
+        {gameState.isPlaying && (
+          <div className="text-sm text-gray-300">
+            Reproduciendo... 10 segundos
+          </div>
+        )}
       </div>
 
       {/* Opciones de respuesta */}
