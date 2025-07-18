@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { Song, GameState, GameStats } from '../types/xogo'
 import { youtubeMusicService } from '../services/youtubeMusicService'
 import { spotifyService } from '../services/spotifyService'
+import { deezerService } from '../services/deezerService'
 
 // Estado inicial del juego
 const INITIAL_STATE: GameState = {
@@ -34,51 +35,52 @@ export const useGameState = () => {
     const saved = localStorage.getItem('musicguess-stats')
     return saved ? JSON.parse(saved) : INITIAL_STATS
   })
+  const [musicSource, setMusicSource] = useState<'spotify' | 'youtube' | 'deezer'>('spotify')
 
   // Cargar canciones desde YouTube y Spotify
   const loadSongs = useCallback(async (category: string = 'pop') => {
     setGameState(prev => ({ ...prev, isLoading: true }))
     let songs: Song[] = []
     try {
-      // 1. Buscar canciones populares en Spotify
-      const spotifyTracks = await spotifyService.getRandomTracks(category, 10)
-      const spotifySongs: Song[] = spotifyTracks
-        .filter(track => !!track.preview_url)
-        .map(track => ({
+      if (musicSource === 'spotify') {
+        const spotifyTracks = await spotifyService.getRandomTracks(category, 10)
+        songs = spotifyTracks
+          .filter(track => !!track.preview_url)
+          .map(track => ({
+            id: track.id,
+            title: track.name,
+            artist: track.artists[0]?.name || '',
+            previewUrl: track.preview_url || '',
+            albumCover: track.album.images[0]?.url || ''
+          }))
+      } else if (musicSource === 'youtube') {
+        const youtubeTracks = await youtubeMusicService.searchByCategory(category, 10)
+        songs = youtubeTracks.map(track => ({
           id: track.id,
-          title: track.name,
-          artist: track.artists[0]?.name || '',
-          previewUrl: track.preview_url || '',
-          albumCover: track.album.images[0]?.url || ''
+          title: track.title,
+          artist: track.artist,
+          previewUrl: track.audioUrl || '',
+          albumCover: track.thumbnailUrl || ''
         }))
+      } else if (musicSource === 'deezer') {
+        songs = await deezerService.searchTracks(category, 10)
+      }
 
-      // 2. Buscar canciones populares en YouTube
-      const youtubeTracks = await youtubeMusicService.searchByCategory(category, 10)
-      const youtubeSongs: Song[] = youtubeTracks.map(track => ({
-        id: track.id,
-        title: track.title,
-        artist: track.artist,
-        previewUrl: track.audioUrl || '',
-        albumCover: track.thumbnailUrl || ''
-      }))
-
-      // 3. Unir y filtrar duplicados
-      songs = [...spotifySongs, ...youtubeSongs].filter(song => song.previewUrl)
+      // Filtrar duplicados
+      songs = songs.filter(song => song.previewUrl)
       songs = songs.filter((song, idx, arr) =>
         arr.findIndex(s => s.title.toLowerCase() === song.title.toLowerCase() && s.artist.toLowerCase() === song.artist.toLowerCase()) === idx
       )
 
-      // 4. Si no hay suficientes canciones, usar fallback
       if (songs.length < 4) {
-        throw new Error('Non se encontraron cancións suficientes en Spotify/YouTube')
+        throw new Error('Non se encontraron cancións suficientes en la fuente seleccionada')
       }
 
-      // 5. Mezclar canciones
       const shuffledSongs = songs.sort(() => Math.random() - 0.5)
       setAvailableSongs(shuffledSongs)
       localStorage.setItem('musicguess-songs-cache', JSON.stringify(shuffledSongs))
       localStorage.setItem('musicguess-cache-timestamp', Date.now().toString())
-      console.log(`✅ ${shuffledSongs.length} cancións cargadas de Spotify/YouTube`)
+      console.log(`✅ ${shuffledSongs.length} cancións cargadas de ${musicSource}`)
     } catch (error) {
       // Fallback: canciones de ejemplo
       console.error('❌ Error cargando cancións:', error)
@@ -143,7 +145,11 @@ export const useGameState = () => {
       setAvailableSongs(fallbackSongs)
     }
     setGameState(prev => ({ ...prev, isLoading: false }))
-  }, [])
+  }, [musicSource])
+  // Permitir cambiar la fuente de música desde el exterior
+  const setMusicSourceExternal = (source: 'spotify' | 'youtube' | 'deezer') => {
+    setMusicSource(source)
+  }
 
   // Iniciar juego
   const startGame = useCallback(async (difficulty: 'easy' | 'medium' | 'hard' = 'medium', category: string = 'pop') => {
@@ -270,6 +276,8 @@ export const useGameState = () => {
     togglePlay,
     loadSongs,
     clearCache,
-    updateSettings
+    updateSettings,
+    musicSource,
+    setMusicSource: setMusicSourceExternal
   }
 }

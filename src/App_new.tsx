@@ -11,59 +11,33 @@ function App() {
     nextRound,
     selectAnswer,
     resetGame,
-    togglePlay,
-    loadSongs,
-    clearCache,
-    musicSource,
-    setMusicSource
+    togglePlayback,
+    updateSettings
   } = useGameState()
-
-  // Hacer clearCache accesible globalmente para depuración
-  useEffect(() => {
-    (window as any).clearMusicCache = clearCache
-    console.log('🔧 Para limpiar el caché, usa: window.clearMusicCache()')
-  }, [clearCache])
 
   const audioRef = useRef<HTMLAudioElement>(null)
 
-
-  // Determinar si la URL es de YouTube
-  const isYouTubeUrl = (url: string) => {
-    return url.includes('youtube.com/embed/') || url.includes('youtube.com/results')
-  }
-
   // Manejar reproducción de audio
   useEffect(() => {
-    if (gameState.currentSong && gameState.isPlaying) {
-      const previewUrl = gameState.currentSong.previewUrl
-      
-      if (isYouTubeUrl(previewUrl)) {
-        // Para YouTube, simplemente mostrar el iframe
-        console.log('🎵 Reproduciendo desde YouTube:', previewUrl)
-      } else {
-        // Para otros audios, usar el elemento audio
-        if (audioRef.current) {
-          audioRef.current.src = previewUrl
-          audioRef.current.play().catch(console.error)
-        }
-      }
-      
-      // Pausar después de 10 segundos
-      const timer = setTimeout(() => {
-        if (audioRef.current && !isYouTubeUrl(previewUrl)) {
-          audioRef.current.pause()
-        }
-        togglePlay()
-      }, 10000)
+    if (audioRef.current && gameState.currentSong) {
+      if (gameState.isPlaying) {
+        audioRef.current.src = gameState.currentSong.previewUrl
+        audioRef.current.play().catch(console.error)
+        
+        // Pausar después de 10 segundos
+        const timer = setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.pause()
+            togglePlayback()
+          }
+        }, 10000)
 
-      return () => clearTimeout(timer)
-    } else {
-      // Pausar audio si no está reproduciéndose
-      if (audioRef.current) {
+        return () => clearTimeout(timer)
+      } else {
         audioRef.current.pause()
       }
     }
-  }, [gameState.isPlaying, gameState.currentSong, togglePlay])
+  }, [gameState.isPlaying, gameState.currentSong, togglePlayback])
 
   // Pantalla de inicio
   if (!gameState.gameStarted) {
@@ -78,61 +52,69 @@ function App() {
               MusicGuess
             </h1>
             <p className="text-gray-300 text-lg">
-              Podes adiviñar a canción en 10 segundos?
+              ¿Puedes adivinar la canción en 10 segundos?
             </p>
           </div>
 
-          {/* Configuración del juego: selector de fuente de música */}
+          {/* Configuración del juego */}
           <div className="glass-effect rounded-2xl p-6 mb-6">
             <div className="flex items-center mb-4">
               <Settings className="w-5 h-5 mr-2 text-spotify-green" />
               <h2 className="text-lg font-semibold">Configuración</h2>
             </div>
+            
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Fuente de música</label>
+                <label className="block text-sm font-medium mb-2">Dificultad</label>
                 <div className="grid grid-cols-3 gap-2">
-                  <button
-                    className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${musicSource === 'spotify' ? 'bg-spotify-green text-white' : 'glass-effect hover:bg-white/20'}`}
-                    onClick={() => setMusicSource('spotify')}
-                    type="button"
-                  >
-                    Spotify
-                  </button>
-                  <button
-                    className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${musicSource === 'youtube' ? 'bg-red-600 text-white' : 'glass-effect hover:bg-white/20'}`}
-                    onClick={() => setMusicSource('youtube')}
-                    type="button"
-                  >
-                    YouTube
-                  </button>
-                  <button
-                    className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${musicSource === 'deezer' ? 'bg-blue-600 text-white' : 'glass-effect hover:bg-white/20'}`}
-                    onClick={() => setMusicSource('deezer')}
-                    type="button"
-                  >
-                    Deezer
-                  </button>
+                  {(['easy', 'medium', 'hard'] as const).map((diff) => (
+                    <button
+                      key={diff}
+                      onClick={() => updateSettings(diff, gameState.category)}
+                      className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                        gameState.difficulty === diff
+                          ? 'bg-spotify-green text-white'
+                          : 'glass-effect hover:bg-white/20'
+                      }`}
+                    >
+                      {diff === 'easy' ? 'Fácil (5)' : diff === 'medium' ? 'Medio (10)' : 'Difícil (15)'}
+                    </button>
+                  ))}
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Categoría</label>
+                <select
+                  value={gameState.category}
+                  onChange={(e) => updateSettings(gameState.difficulty, e.target.value)}
+                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white"
+                >
+                  <option value="pop">Pop</option>
+                  <option value="hits">Top Hits</option>
+                  <option value="rock">Rock</option>
+                  <option value="latin">Latino</option>
+                  <option value="electronic">Electrónica</option>
+                </select>
               </div>
             </div>
           </div>
 
           {/* Cómo jugar */}
           <div className="glass-effect rounded-2xl p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">Como xogar</h2>
+            <h2 className="text-xl font-semibold mb-4">Cómo jugar</h2>
             <div className="space-y-3 text-sm text-gray-300">
               <div className="flex items-center">
                 <Volume2 className="w-4 h-4 mr-3 text-spotify-green" />
-                <span>Escoita 10 segundos da canción</span>
+                <span>Escucha 10 segundos de la canción</span>
               </div>
               <div className="flex items-center">
                 <Star className="w-4 h-4 mr-3 text-spotify-green" />
-                <span>Escolle a resposta correcta</span>
+                <span>Elige la respuesta correcta</span>
               </div>
               <div className="flex items-center">
                 <RotateCcw className="w-4 h-4 mr-3 text-spotify-green" />
-                <span>Completa todas as roldas e obtén a túa puntuación</span>
+                <span>Completa todas las rondas y obtén tu puntuación</span>
               </div>
             </div>
           </div>
@@ -147,15 +129,15 @@ function App() {
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
                   <div className="text-2xl font-bold text-spotify-green">{stats.bestScore}</div>
-                  <div className="text-sm text-gray-300">Mellor puntuación</div>
+                  <div className="text-sm text-gray-300">Mejor puntuación</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-spotify-green">{stats.totalGames}</div>
-                  <div className="text-sm text-gray-300">Partidas xogadas</div>
+                  <div className="text-sm text-gray-300">Partidas jugadas</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-spotify-green">{stats.averageScore}</div>
-                  <div className="text-sm text-gray-300">Media</div>
+                  <div className="text-sm text-gray-300">Promedio</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-spotify-green">
@@ -168,11 +150,11 @@ function App() {
           )}
 
           <button 
-            onClick={() => startGame(gameState.difficulty)}
+            onClick={() => startGame(gameState.difficulty, gameState.category)}
             disabled={gameState.isLoading}
             className="button-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {gameState.isLoading ? 'Cargando cancións...' : 'Comezar a xogar'}
+            {gameState.isLoading ? 'Cargando canciones...' : 'Empezar a jugar'}
           </button>
           
           {/* Debug info */}
@@ -199,6 +181,7 @@ function App() {
   // Pantalla de juego
   return (
     <div className="min-h-screen p-4">
+      <audio ref={audioRef} />
       
       {/* Header con puntuación */}
       <div className="flex justify-between items-center mb-6">
@@ -207,7 +190,7 @@ function App() {
             <RotateCcw className="w-4 h-4" />
           </button>
           <div className="text-sm">
-            <span className="text-gray-300">Rolda </span>
+            <span className="text-gray-300">Ronda </span>
             <span className="font-bold text-spotify-green">{gameState.round}</span>
             <span className="text-gray-300"> de {gameState.maxRounds}</span>
           </div>
@@ -245,7 +228,7 @@ function App() {
           )}
           
           <button 
-            onClick={togglePlay}
+            onClick={togglePlayback}
             className="button-primary"
           >
             {gameState.isPlaying ? (
@@ -257,14 +240,9 @@ function App() {
           </button>
         </div>
 
-        {/* Reproductor de YouTube - Abrir en nueva ventana (eliminado, solo audio en app) */}
-
-        {/* Reproductor de audio tradicional */}
-        <audio ref={audioRef} />
-
         {gameState.isPlaying && (
           <div className="text-sm text-gray-300">
-            Reproducindo... 10 segundos
+            Reproduciendo... 10 segundos
           </div>
         )}
       </div>
@@ -272,18 +250,18 @@ function App() {
       {/* Opciones de respuesta */}
       <div className="space-y-3">
         <h3 className="text-lg font-semibold text-center mb-4">
-          Cal é esta canción?
+          ¿Cuál es esta canción?
         </h3>
         
         {gameState.options.map((song) => {
           const isCorrect = song.id === gameState.currentSong?.id
-          const isSelected = gameState.selectedAnswer === song.id
+          const isSelected = gameState.selectedAnswer?.id === song.id
           const showResult = gameState.showAnswer
           
           return (
             <button
               key={song.id}
-              onClick={() => selectAnswer(song.id)}
+              onClick={() => selectAnswer(song)}
               disabled={gameState.showAnswer}
               className={`w-full p-4 rounded-xl text-left transition-all duration-200 ${
                 showResult && isCorrect 
@@ -321,7 +299,7 @@ function App() {
             onClick={nextRound}
             className="button-primary"
           >
-            {gameState.round >= gameState.maxRounds ? 'Ver Resultados' : 'Seguinte Rolda'}
+            {gameState.round >= gameState.maxRounds ? 'Ver Resultados' : 'Siguiente Ronda'}
           </button>
         </div>
       )}
