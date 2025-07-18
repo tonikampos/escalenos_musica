@@ -1,18 +1,11 @@
-        'QUEVEDO',
-        'Myke Towers',
-        'Beéle',
-        'Lucho RK',
-        'Kapo',
-        'Blackpink',
-        'Lola Indigo',
-        'Bad Bunny',
-        'Manuel Turizo',
-        'Karol G',
+
 import { useState, useCallback, useEffect } from 'react'
 import { Song, GameState, GameStats } from '../types/xogo'
 import { youtubeMusicService } from '../services/youtubeMusicService'
 import { spotifyService } from '../services/spotifyService'
 import { deezerService } from '../services/deezerService'
+
+// ...existing code...
 
 // Estado inicial del juego
 const INITIAL_STATE: GameState = {
