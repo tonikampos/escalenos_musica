@@ -44,12 +44,12 @@ export const useGameState = () => {
     albumCover: track.thumbnailUrl
   })
 
-  // Cargar canciones REALES de YouTube Music
-  const loadSongs = useCallback(async (category: string = 'pop') => {
+  // Cargar canciones REALES de artistas específicos usando YouTube
+  const loadSongs = useCallback(async () => {
     setGameState(prev => ({ ...prev, isLoading: true }))
     
-    console.log('🎵 CARGANDO CANCIONES DE YOUTUBE MUSIC')
-    console.log('🎯 Categoría seleccionada:', category)
+    console.log('🎵 CARGANDO CANCIONES DE ARTISTAS ESPECÍFICOS')
+    console.log('🎯 Buscando canciones de artistas seleccionados...')
     
     try {
       // Verificar si tenemos API key de YouTube
@@ -58,115 +58,71 @@ export const useGameState = () => {
         throw new Error('No YouTube API key configured')
       }
 
-      // Estrategia 1: Buscar por categoría
-      console.log('🔍 Buscando por categoría:', category)
-      let tracks = await youtubeMusicService.searchByCategory(category, 50)
-      
-      if (tracks.length < 20) {
-        console.log('🔄 Pocos resultados, buscando por artistas populares...')
-        
-        // Estrategia 2: Buscar por artistas populares (AMPLIADA para conseguir 100+ canciones)
-        const popularArtistsByCategory = {
-          'pop': [
-            // Pop Internacional
-            'Taylor Swift', 'Ed Sheeran', 'Ariana Grande', 'Harry Styles', 'Dua Lipa',
-            'Justin Bieber', 'Bruno Mars', 'The Weeknd', 'Billie Eilish', 'Olivia Rodrigo',
-            'Adele', 'Sam Smith', 'Doja Cat', 'Lizzo', 'Camila Cabello', 'Shawn Mendes',
-            'Post Malone', 'Maroon 5', 'OneRepublic', 'Imagine Dragons', 'Coldplay',
-            'Lady Gaga', 'Katy Perry', 'Miley Cyrus', 'Selena Gomez', 'Rihanna',
-            'Justin Timberlake', 'John Mayer', 'Charlie Puth', 'Lewis Capaldi', 'Khalid',
-            // Pop Español
-            'Aitana', 'Ana Guerra', 'Álvaro Soler', 'Jesse & Joy', 'Mau y Ricky',
-            'David Bisbal', 'Alejandro Sanz', 'Pablo Alborán', 'Antonio Orozco', 'Malú',
-            'Vanesa Martín', 'India Martínez', 'Blas Cantó', 'Roi Méndez', 'Raoul Vázquez'
-          ],
-          'rock': [
-            // Rock Clásico
-            'Queen', 'The Beatles', 'Led Zeppelin', 'Pink Floyd', 'The Rolling Stones',
-            'AC/DC', 'Black Sabbath', 'Deep Purple', 'The Who', 'Aerosmith',
-            'Kiss', 'Iron Maiden', 'Metallica', 'Guns N Roses', 'Nirvana',
-            // Rock Moderno
-            'Foo Fighters', 'Red Hot Chili Peppers', 'Pearl Jam', 'Soundgarden', 'Alice in Chains',
-            'Stone Temple Pilots', 'Linkin Park', 'Green Day', 'The Offspring', 'Blink-182',
-            'Radiohead', 'Muse', 'Arctic Monkeys', 'The Killers', 'Franz Ferdinand',
-            'The Strokes', 'Kings of Leon', 'The Black Keys', 'Royal Blood', 'Greta Van Fleet',
-            // Rock Español
-            'Héroes del Silencio', 'Extremoduro', 'Platero y Tú', 'Barricada', 'Reincidentes',
-            'Marea', 'Rosendo', 'Leño', 'Burning', 'Obús', 'Barón Rojo', 'Saratoga',
-            'Mägo de Oz', 'Tierra Santa', 'Avalanch', 'Saurom', 'Medina Azahara'
-          ],
-          'indie': [
-            // Indie Internacional
-            'Arctic Monkeys', 'The Strokes', 'Tame Impala', 'Glass Animals', 'Foster the People',
-            'Vampire Weekend', 'The 1975', 'Two Door Cinema Club', 'Phoenix', 'MGMT',
-            'Alt-J', 'Bon Iver', 'Fleet Foxes', 'Grizzly Bear', 'Animal Collective',
-            'Beach House', 'Arcade Fire', 'Modest Mouse', 'The Shins', 'Interpol',
-            'Franz Ferdinand', 'Bloc Party', 'Kasabian', 'Foals', 'Everything Everything',
-            // Indie Español
-            'Vetusta Morla', 'Love of Lesbian', 'Izal', 'Dorian', 'Second',
-            'Sidonie', 'Lori Meyers', 'The Hinds', 'Triángulo de Amor Bizarro', 'Delafé y las Flores Azules',
-            'Zahara', 'Supersubmarina', 'Miss Caffeina', 'Xoel López', 'Fuel Fandango',
-            'Quique González', 'Nacho Vegas', 'Maga', 'Russian Red', 'La Bien Querida',
-            'Delorean', 'Pony Bravo', 'Tulsa', 'Berlín', 'Capitan Sunrise', 'Parade'
-          ],
-          'galega': [
-            // Música Gallega Tradicional y Moderna
-            'Luar na Lubre', 'Milladoiro', 'Cristina Pato', 'Susana Seivane', 'Carlos Núñez',
-            'Berrogüetto', 'Fin de Semana', 'Fuxan os Ventos', 'Mato Grosso', 'Narf',
-            'Brath', 'Fía na Roca', 'Anxo Lorenzo', 'Uxía', 'Mercedes Peón',
-            'Xabier Díaz', 'Tanxugueiras', 'Dakidarría', 'Celtas Cortos', 'Mägo de Oz',
-            'Siniestro Total', 'Os Resentidos', 'Golpes Bajos', 'Radio Futura', 'Iván Ferreiro',
-            'Deluxe', 'Novedades Carminha', 'Korrontzi', 'Kepa Junkera', 'Oreka TX',
-            'Heredeiros da Crus', 'Dani Flaco', 'Dani Rivas', 'Monterroso', 'Guadi Galego',
-            'Xabregas', 'Leilía', 'Adiós Mariquita', 'Fillas de Cassandra', 'Noa Pérez'
-          ],
-          'grandes-exitos': [
-            // Grandes Éxitos Internacionales de Todos los Tiempos
-            'Queen', 'The Beatles', 'Michael Jackson', 'Madonna', 'Elvis Presley',
-            'ABBA', 'Bee Gees', 'Elton John', 'Whitney Houston', 'Céline Dion',
-            'Mariah Carey', 'Stevie Wonder', 'Prince', 'David Bowie', 'U2',
-            'Coldplay', 'Adele', 'Ed Sheeran', 'Taylor Swift', 'Bruno Mars',
-            'Rihanna', 'Beyoncé', 'Lady Gaga', 'Justin Timberlake', 'Eminem',
-            'Drake', 'The Weeknd', 'Billie Eilish', 'Dua Lipa', 'Ariana Grande',
-            'Luis Fonsi', 'Shakira', 'Enrique Iglesias', 'Ricky Martin', 'Manu Chao',
-            'Alejandro Sanz', 'Jesse & Joy', 'Maná', 'Juanes', 'Carlos Vives',
-            'PSY', 'BTS', 'Blackpink', 'Stray Kids', 'TWICE', 'Red Velvet',
-            'Despacito', 'Gangnam Style', 'Macarena', 'Bailando', 'Waka Waka'
-          ]
-        }
+      // Lista de artistas específicos que quieres
+      const artistasEspecificos = [
+        'ARDE BOGOTÁ',
+        'SHINOVA', 
+        'SILOE',
+        'VIVA SUECIA',
+        'HERDEIROS DA CRUZ',
+        'VETUSTA MORLA',
+        'IZAL',
+        'DORIAN',
+        'SIDONIE',
+        'PARACETAFOLK',
+        'FILLAS DE CASANDRA',
+        'TANXUGUEIRAS',
+        'LOQUILLO'
+      ]
 
-        const artists = popularArtistsByCategory[category as keyof typeof popularArtistsByCategory] || popularArtistsByCategory.pop
-        
-        for (const artist of artists) {
+      let tracks: any[] = []
+      
+      // Buscar canciones de cada artista específico
+      for (const artist of artistasEspecificos) {
+        try {
+          console.log(`🎤 Buscando las mejores canciones de: ${artist}`)
+          const artistTracks = await youtubeMusicService.searchByArtist(artist, 10) // 10 canciones por artista
+          tracks = [...tracks, ...artistTracks]
+          
+          console.log(`✅ Encontradas ${artistTracks.length} canciones de ${artist}`)
+          
+          // Pequeña pausa para evitar rate limiting
+          await new Promise(resolve => setTimeout(resolve, 200))
+          
+        } catch (error) {
+          console.log(`❌ Error buscando ${artist}:`, error)
+          
+          // Intentar búsqueda alternativa si falla
           try {
-            console.log(`🎤 Buscando canciones de: ${artist}`)
-            const artistTracks = await youtubeMusicService.searchByArtist(artist, 3)
-            tracks = [...tracks, ...artistTracks]
-            
-            if (tracks.length >= 80) break
-          } catch (error) {
-            console.log(`❌ Error buscando ${artist}:`, error)
+            console.log(`🔄 Intentando búsqueda alternativa para ${artist}`)
+            const alternativeTracks = await youtubeMusicService.searchTracks(`${artist} mejor canción`, 5)
+            tracks = [...tracks, ...alternativeTracks]
+          } catch (altError) {
+            console.log(`❌ También falló la búsqueda alternativa para ${artist}`)
           }
         }
       }
 
-      console.log('📊 Total de tracks de YouTube:', tracks.length)
+      console.log('📊 Total de tracks encontrados:', tracks.length)
       
       if (tracks.length === 0) {
-        throw new Error('No se encontraron canciones en YouTube Music')
+        throw new Error('No se encontraron canciones de los artistas especificados')
       }
 
       // Convertir a nuestro formato
       const songs = tracks.map(convertYouTubeTrack)
       
-      // Filtrar duplicados por título
+      // Filtrar duplicados por título y artista
       const uniqueSongs = songs.filter((song, index, self) => 
-        index === self.findIndex(s => s.title.toLowerCase() === song.title.toLowerCase())
+        index === self.findIndex(s => 
+          s.title.toLowerCase() === song.title.toLowerCase() && 
+          s.artist.toLowerCase() === song.artist.toLowerCase()
+        )
       )
       
-      console.log(`✅ Canciones únicas de YouTube: ${uniqueSongs.length}`)
-      console.log('📋 Muestra de canciones:')
-      uniqueSongs.slice(0, 5).forEach((song, i) => {
+      console.log(`✅ Canciones únicas encontradas: ${uniqueSongs.length}`)
+      console.log('📋 Muestra de canciones encontradas:')
+      uniqueSongs.slice(0, 10).forEach((song, i) => {
         console.log(`${i + 1}. ${song.title} - ${song.artist}`)
       })
 
@@ -174,92 +130,88 @@ export const useGameState = () => {
         throw new Error(`Solo ${uniqueSongs.length} canciones encontradas, necesitamos al menos 4`)
       }
 
-      // Mezclar las canciones - AUMENTADO A 100 CANCIONES
-      const shuffledSongs = uniqueSongs.sort(() => Math.random() - 0.5).slice(0, 100)
+      // Mezclar las canciones - tomar todas las encontradas (sin límite específico)
+      const shuffledSongs = uniqueSongs.sort(() => Math.random() - 0.5)
       
       setAvailableSongs(shuffledSongs)
-      console.log(`✅ ÉXITO: ${shuffledSongs.length} canciones reales de YouTube Music cargadas`)
+      console.log(`✅ ÉXITO: ${shuffledSongs.length} canciones de tus artistas favoritos cargadas`)
+      
+      // Mostrar estadísticas por artista
+      const artistStats = artistasEspecificos.map(artist => {
+        const count = shuffledSongs.filter(song => 
+          song.artist.toLowerCase().includes(artist.toLowerCase())
+        ).length
+        return `${artist}: ${count} canciones`
+      })
+      console.log('📊 Canciones por artista:')
+      artistStats.forEach(stat => console.log(`   ${stat}`))
       
     } catch (error) {
-      console.error('❌ Error cargando de YouTube Music:', error)
+      console.error('❌ Error cargando canciones de artistas específicos:', error)
       
-      // Fallback: Usar canciones populares con información real
-      console.log('🔄 Usando fallback con canciones populares conocidas...')
+      // Fallback: Usar canciones conocidas de algunos de estos artistas
+      console.log('🔄 Usando fallback con canciones conocidas de tus artistas...')
       
       const fallbackSongs: Song[] = [
         {
-          id: 'dQw4w9WgXcQ',
-          title: 'Never Gonna Give You Up',
-          artist: 'Rick Astley',
+          id: 'sample1',
+          title: 'Los Perros',
+          artist: 'Vetusta Morla',
           previewUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&start=30&end=60&controls=0',
           albumCover: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg'
         },
         {
-          id: 'kJQP7kiw5Fk',
-          title: 'Despacito',
-          artist: 'Luis Fonsi ft. Daddy Yankee',
+          id: 'sample2',
+          title: 'Copacabana',
+          artist: 'Izal',
           previewUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk?autoplay=1&start=30&end=60&controls=0',
           albumCover: 'https://img.youtube.com/vi/kJQP7kiw5Fk/maxresdefault.jpg'
         },
         {
-          id: '9bZkp7q19f0',
-          title: 'Gangnam Style',
-          artist: 'PSY',
+          id: 'sample3',
+          title: 'Caballero',
+          artist: 'Dorian',
           previewUrl: 'https://www.youtube.com/embed/9bZkp7q19f0?autoplay=1&start=30&end=60&controls=0',
           albumCover: 'https://img.youtube.com/vi/9bZkp7q19f0/maxresdefault.jpg'
         },
         {
-          id: 'fJ9rUzIMcZQ',
-          title: 'Bohemian Rhapsody',
-          artist: 'Queen',
+          id: 'sample4',
+          title: 'Fascinado',
+          artist: 'Sidonie',
           previewUrl: 'https://www.youtube.com/embed/fJ9rUzIMcZQ?autoplay=1&start=30&end=60&controls=0',
           albumCover: 'https://img.youtube.com/vi/fJ9rUzIMcZQ/maxresdefault.jpg'
         },
         {
-          id: '60ItHLz5WEA',
-          title: 'Shape of You',
-          artist: 'Ed Sheeran',
+          id: 'sample5',
+          title: 'Terra',
+          artist: 'Tanxugueiras',
           previewUrl: 'https://www.youtube.com/embed/60ItHLz5WEA?autoplay=1&start=30&end=60&controls=0',
           albumCover: 'https://img.youtube.com/vi/60ItHLz5WEA/maxresdefault.jpg'
         },
         {
-          id: 'JGwWNGJdvx8',
-          title: 'Shape of You',
-          artist: 'Ed Sheeran',
+          id: 'sample6',
+          title: 'Cadenas',
+          artist: 'Loquillo',
           previewUrl: 'https://www.youtube.com/embed/JGwWNGJdvx8?autoplay=1&start=30&end=60&controls=0',
           albumCover: 'https://img.youtube.com/vi/JGwWNGJdvx8/maxresdefault.jpg'
         },
         {
-          id: 'hTWKbfoikeg',
-          title: 'Smells Like Teen Spirit',
-          artist: 'Nirvana',
+          id: 'sample7',
+          title: 'Antartida',
+          artist: 'Shinova',
           previewUrl: 'https://www.youtube.com/embed/hTWKbfoikeg?autoplay=1&start=30&end=60&controls=0',
           albumCover: 'https://img.youtube.com/vi/hTWKbfoikeg/maxresdefault.jpg'
         },
         {
-          id: 'YQHsXMglC9A',
-          title: 'Hello',
-          artist: 'Adele',
+          id: 'sample8',
+          title: 'Otros Aires',
+          artist: 'Viva Suecia',
           previewUrl: 'https://www.youtube.com/embed/YQHsXMglC9A?autoplay=1&start=30&end=60&controls=0',
           albumCover: 'https://img.youtube.com/vi/YQHsXMglC9A/maxresdefault.jpg'
-        },
-        {
-          id: 'RgKAFK5djSk',
-          title: 'Waka Waka',
-          artist: 'Shakira',
-          previewUrl: 'https://www.youtube.com/embed/RgKAFK5djSk?autoplay=1&start=30&end=60&controls=0',
-          albumCover: 'https://img.youtube.com/vi/RgKAFK5djSk/maxresdefault.jpg'
-        },
-        {
-          id: 'LOZuxwVk7TU',
-          title: 'Señorita',
-          artist: 'Shawn Mendes & Camila Cabello',
-          previewUrl: 'https://www.youtube.com/embed/LOZuxwVk7TU?autoplay=1&start=30&end=60&controls=0',
-          albumCover: 'https://img.youtube.com/vi/LOZuxwVk7TU/maxresdefault.jpg'
         }
       ]
       
-      console.log('📝 Usando canciones YouTube conocidas:', fallbackSongs.length)
+      console.log('📝 Usando canciones conocidas de tus artistas:', fallbackSongs.length)
       setAvailableSongs(fallbackSongs)
     }
     
@@ -267,9 +219,9 @@ export const useGameState = () => {
   }, [])
 
   // Iniciar juego
-  const startGame = useCallback(async (difficulty: 'easy' | 'medium' | 'hard' = 'medium', category: string = 'pop') => {
+  const startGame = useCallback(async (difficulty: 'easy' | 'medium' | 'hard' = 'medium') => {
     if (availableSongs.length === 0) {
-      await loadSongs(category)
+      await loadSongs()
     }
 
     const songs = availableSongs.length > 0 ? availableSongs : []
@@ -293,8 +245,7 @@ export const useGameState = () => {
       options: allOptions,
       selectedAnswer: null,
       showAnswer: false,
-      difficulty,
-      category
+      difficulty
     }))
   }, [availableSongs, loadSongs])
 

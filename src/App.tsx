@@ -23,11 +23,6 @@ function App() {
     console.log('Cambiando dificultad a:', difficulty)
   }
 
-  const updateCategory = (category: string) => {
-    // En una implementación real, esto actualizaría el estado
-    console.log('Cambiando categoría a:', category)
-  }
-
   // Determinar si la URL es de YouTube
   const isYouTubeUrl = (url: string) => {
     return url.includes('youtube.com/embed/')
@@ -110,19 +105,24 @@ function App() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">Categoría</label>
-                <select
-                  value={gameState.category}
-                  onChange={(e) => updateCategory(e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white"
-                >
-                  <option value="pop">🎵 Pop</option>
-                  <option value="rock">🎸 Rock</option>
-                  <option value="indie">🎼 Indie</option>
-                  <option value="galega">🎻 Galega</option>
-                  <option value="grandes-exitos">🌟 Grandes Éxitos Internacionales</option>
-                </select>
+              {/* Información de artistas */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                <h3 className="text-lg font-semibold mb-2">🎤 Artistas Incluidos</h3>
+                <div className="grid grid-cols-2 gap-1 text-sm">
+                  <span>• ARDE BOGOTÁ</span>
+                  <span>• SHINOVA</span>
+                  <span>• SILOE</span>
+                  <span>• VIVA SUECIA</span>
+                  <span>• HERDEIROS DA CRUZ</span>
+                  <span>• VETUSTA MORLA</span>
+                  <span>• IZAL</span>
+                  <span>• DORIAN</span>
+                  <span>• SIDONIE</span>
+                  <span>• PARACETAFOLK</span>
+                  <span>• FILLAS DE CASANDRA</span>
+                  <span>• TANXUGUEIRAS</span>
+                  <span>• LOQUILLO</span>
+                </div>
               </div>
             </div>
           </div>
@@ -177,7 +177,7 @@ function App() {
           )}
 
           <button 
-            onClick={() => startGame(gameState.difficulty, gameState.category)}
+            onClick={() => startGame(gameState.difficulty)}
             disabled={gameState.isLoading}
             className="button-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
