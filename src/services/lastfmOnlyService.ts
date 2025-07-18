@@ -74,13 +74,12 @@ class LastFmOnlyService {
   }
 
   private generateSimpleAudioUrl(songTitle: string, artistName: string): string {
-    // Generar URL simple para demostración
-    // En producción, esto podría ser un servicio de audio alternativo
-    const query = `${artistName} ${songTitle}`
+    // Generar URL de YouTube de búsqueda que se puede abrir en nueva ventana
+    const query = `${artistName} ${songTitle} official audio`
     const encodedQuery = encodeURIComponent(query)
     
-    // Usar un servicio de audio genérico como placeholder
-    return `https://www.youtube.com/embed/search?query=${encodedQuery}&autoplay=1&controls=0`
+    // Usar URL de búsqueda de YouTube - se abrirá en nueva ventana
+    return `https://www.youtube.com/results?search_query=${encodedQuery}`
   }
 
   async searchTracks(query: string, limit: number = 5): Promise<LastFmOnlyTrack[]> {
