@@ -171,7 +171,7 @@ class YouTubeMusicService {
 
   // Obtener URL de audio embedible para YouTube
   getEmbedAudioUrl(videoId: string): string {
-    return `https://www.youtube.com/embed/${videoId}?autoplay=1&start=30&end=60&controls=0&modestbranding=1`
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&start=30&end=50&controls=0&modestbranding=1`
   }
 
   // Verificar si tenemos API key

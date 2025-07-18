@@ -52,14 +52,31 @@ export const useGameState = () => {
     console.log('🎯 Buscando canciones de artistas seleccionados...')
     
     try {
+      // Verificar caché primero
+      const cachedSongs = localStorage.getItem('musicguess-songs-cache')
+      const cacheTimestamp = localStorage.getItem('musicguess-cache-timestamp')
+      const oneDayInMs = 24 * 60 * 60 * 1000
+      
+      if (cachedSongs && cacheTimestamp) {
+        const cacheAge = Date.now() - parseInt(cacheTimestamp)
+        if (cacheAge < oneDayInMs) {
+          console.log('✅ Usando canciones del caché (válidas por 24h)')
+          const songs = JSON.parse(cachedSongs)
+          setAvailableSongs(songs)
+          setGameState(prev => ({ ...prev, isLoading: false }))
+          return
+        }
+      }
+      
       // Verificar si tenemos API key de YouTube
       if (!youtubeMusicService.hasApiKey()) {
         console.log('⚠️ No hay API key de YouTube, usando fallback')
         throw new Error('No YouTube API key configured')
       }
 
-      // Lista de artistas específicos que quieres
+      // Lista de artistas específicos que quieres + artistas más escuchados actuales
       const artistasEspecificos = [
+        // Artistas específicos originales (13 artistas españoles - TODOS MANTENIDOS)
         'ARDE BOGOTÁ',
         'SHINOVA', 
         'SILOE',
@@ -72,7 +89,13 @@ export const useGameState = () => {
         'PARACETAFOLK',
         'FILLAS DE CASANDRA',
         'TANXUGUEIRAS',
-        'LOQUILLO'
+        'LOQUILLO',
+        
+        // Top artistas internacionales más escuchados (reducido a 4 para optimizar cuota)
+        'Bad Bunny',
+        'Taylor Swift',
+        'The Weeknd',
+        'Billie Eilish'
       ]
 
       let tracks: any[] = []
@@ -81,13 +104,13 @@ export const useGameState = () => {
       for (const artist of artistasEspecificos) {
         try {
           console.log(`🎤 Buscando las mejores canciones de: ${artist}`)
-          const artistTracks = await youtubeMusicService.searchByArtist(artist, 10) // 10 canciones por artista
+          const artistTracks = await youtubeMusicService.searchByArtist(artist, 3) // Reducido a 3 canciones por artista
           tracks = [...tracks, ...artistTracks]
           
           console.log(`✅ Encontradas ${artistTracks.length} canciones de ${artist}`)
           
           // Pequeña pausa para evitar rate limiting
-          await new Promise(resolve => setTimeout(resolve, 200))
+          await new Promise(resolve => setTimeout(resolve, 300))
           
         } catch (error) {
           console.log(`❌ Error buscando ${artist}:`, error)
@@ -133,8 +156,12 @@ export const useGameState = () => {
       // Mezclar las canciones - tomar todas las encontradas (sin límite específico)
       const shuffledSongs = uniqueSongs.sort(() => Math.random() - 0.5)
       
+      // Guardar en caché por 24 horas
+      localStorage.setItem('musicguess-songs-cache', JSON.stringify(shuffledSongs))
+      localStorage.setItem('musicguess-cache-timestamp', Date.now().toString())
+      
       setAvailableSongs(shuffledSongs)
-      console.log(`✅ ÉXITO: ${shuffledSongs.length} canciones de tus artistas favoritos cargadas`)
+      console.log(`✅ ÉXITO: ${shuffledSongs.length} canciones de tus artistas favoritos cargadas y guardadas en caché`)
       
       // Mostrar estadísticas por artista
       const artistStats = artistasEspecificos.map(artist => {
@@ -157,56 +184,56 @@ export const useGameState = () => {
           id: 'sample1',
           title: 'Los Perros',
           artist: 'Vetusta Morla',
-          previewUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&start=30&end=60&controls=0',
+          previewUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&start=30&end=50&controls=0',
           albumCover: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg'
         },
         {
           id: 'sample2',
           title: 'Copacabana',
           artist: 'Izal',
-          previewUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk?autoplay=1&start=30&end=60&controls=0',
+          previewUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk?autoplay=1&start=30&end=50&controls=0',
           albumCover: 'https://img.youtube.com/vi/kJQP7kiw5Fk/maxresdefault.jpg'
         },
         {
           id: 'sample3',
           title: 'Caballero',
           artist: 'Dorian',
-          previewUrl: 'https://www.youtube.com/embed/9bZkp7q19f0?autoplay=1&start=30&end=60&controls=0',
+          previewUrl: 'https://www.youtube.com/embed/9bZkp7q19f0?autoplay=1&start=30&end=50&controls=0',
           albumCover: 'https://img.youtube.com/vi/9bZkp7q19f0/maxresdefault.jpg'
         },
         {
           id: 'sample4',
           title: 'Fascinado',
           artist: 'Sidonie',
-          previewUrl: 'https://www.youtube.com/embed/fJ9rUzIMcZQ?autoplay=1&start=30&end=60&controls=0',
+          previewUrl: 'https://www.youtube.com/embed/fJ9rUzIMcZQ?autoplay=1&start=30&end=50&controls=0',
           albumCover: 'https://img.youtube.com/vi/fJ9rUzIMcZQ/maxresdefault.jpg'
         },
         {
           id: 'sample5',
           title: 'Terra',
           artist: 'Tanxugueiras',
-          previewUrl: 'https://www.youtube.com/embed/60ItHLz5WEA?autoplay=1&start=30&end=60&controls=0',
+          previewUrl: 'https://www.youtube.com/embed/60ItHLz5WEA?autoplay=1&start=30&end=50&controls=0',
           albumCover: 'https://img.youtube.com/vi/60ItHLz5WEA/maxresdefault.jpg'
         },
         {
           id: 'sample6',
           title: 'Cadenas',
           artist: 'Loquillo',
-          previewUrl: 'https://www.youtube.com/embed/JGwWNGJdvx8?autoplay=1&start=30&end=60&controls=0',
+          previewUrl: 'https://www.youtube.com/embed/JGwWNGJdvx8?autoplay=1&start=30&end=50&controls=0',
           albumCover: 'https://img.youtube.com/vi/JGwWNGJdvx8/maxresdefault.jpg'
         },
         {
           id: 'sample7',
           title: 'Antartida',
           artist: 'Shinova',
-          previewUrl: 'https://www.youtube.com/embed/hTWKbfoikeg?autoplay=1&start=30&end=60&controls=0',
+          previewUrl: 'https://www.youtube.com/embed/hTWKbfoikeg?autoplay=1&start=30&end=50&controls=0',
           albumCover: 'https://img.youtube.com/vi/hTWKbfoikeg/maxresdefault.jpg'
         },
         {
           id: 'sample8',
           title: 'Otros Aires',
           artist: 'Viva Suecia',
-          previewUrl: 'https://www.youtube.com/embed/YQHsXMglC9A?autoplay=1&start=30&end=60&controls=0',
+          previewUrl: 'https://www.youtube.com/embed/YQHsXMglC9A?autoplay=1&start=30&end=50&controls=0',
           albumCover: 'https://img.youtube.com/vi/YQHsXMglC9A/maxresdefault.jpg'
         }
       ]

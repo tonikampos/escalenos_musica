@@ -104,26 +104,6 @@ function App() {
                   ))}
                 </div>
               </div>
-
-              {/* Información de artistas */}
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                <h3 className="text-lg font-semibold mb-2">🎤 Artistas Incluidos</h3>
-                <div className="grid grid-cols-2 gap-1 text-sm">
-                  <span>• ARDE BOGOTÁ</span>
-                  <span>• SHINOVA</span>
-                  <span>• SILOE</span>
-                  <span>• VIVA SUECIA</span>
-                  <span>• HERDEIROS DA CRUZ</span>
-                  <span>• VETUSTA MORLA</span>
-                  <span>• IZAL</span>
-                  <span>• DORIAN</span>
-                  <span>• SIDONIE</span>
-                  <span>• PARACETAFOLK</span>
-                  <span>• FILLAS DE CASANDRA</span>
-                  <span>• TANXUGUEIRAS</span>
-                  <span>• LOQUILLO</span>
-                </div>
-              </div>
             </div>
           </div>
 
