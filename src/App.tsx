@@ -232,10 +232,15 @@ function App() {
         <div className="mb-6">
           {gameState.currentSong?.albumCover ? (
             <div className="w-32 h-32 mx-auto mb-4 rounded-2xl overflow-hidden">
-              <img 
-                src={gameState.currentSong.albumCover} 
+              <img
+                src={gameState.currentSong.albumCover}
                 alt="Album cover"
                 className="w-full h-full object-cover"
+                onError={e => {
+                  const target = e.currentTarget;
+                  target.onerror = null;
+                  target.src = '/default_album.png';
+                }}
               />
             </div>
           ) : (
