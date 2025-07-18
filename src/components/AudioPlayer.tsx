@@ -108,30 +108,20 @@ export const AudioPlayer = ({
         </div>
       )}
       
-      {/* Album Cover / Equalizer */}
+      {/* Album Cover oculto: solo visualización de ecualizador o fondo */}
       <div className="mb-6">
-        {albumCover && !isPlaying ? (
-          <div className="w-32 h-32 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg">
-            <img 
-              src={albumCover} 
-              alt="Album cover"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        ) : (
-          <div className="w-32 h-32 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-spotify-green to-green-600 flex items-center justify-center shadow-lg">
-            {isPlaying ? (
-              <div className="flex items-end space-x-1">
-                <div className="equalizer-bar w-2 bg-white rounded-full"></div>
-                <div className="equalizer-bar w-2 bg-white rounded-full"></div>
-                <div className="equalizer-bar w-2 bg-white rounded-full"></div>
-                <div className="equalizer-bar w-2 bg-white rounded-full"></div>
-              </div>
-            ) : (
-              <Play className="w-16 h-16 text-white" />
-            )}
-          </div>
-        )}
+        <div className="w-32 h-32 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-spotify-green to-green-600 flex items-center justify-center shadow-lg">
+          {isPlaying ? (
+            <div className="flex items-end space-x-1">
+              <div className="equalizer-bar w-2 bg-white rounded-full"></div>
+              <div className="equalizer-bar w-2 bg-white rounded-full"></div>
+              <div className="equalizer-bar w-2 bg-white rounded-full"></div>
+              <div className="equalizer-bar w-2 bg-white rounded-full"></div>
+            </div>
+          ) : (
+            <Play className="w-16 h-16 text-white" />
+          )}
+        </div>
 
         {/* Progress Bar */}
         {isPlaying && (

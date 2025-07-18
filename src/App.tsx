@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+  const [showLoading, setShowLoading] = useState(false);
 import { Music, Play, Pause, Volume2, RotateCcw, Star, Settings, Trophy } from 'lucide-react'
 import { useGameState } from './hooks/useGameState'
 
@@ -176,13 +177,20 @@ function App() {
             </div>
           )}
 
-          <button 
-            onClick={() => startGame(gameState.difficulty)}
-            disabled={gameState.isLoading}
+          <button
+            onClick={async () => {
+              // Mostrar mensaje de carga
+              setShowLoading(true);
+              await startGame(gameState.difficulty);
+              setShowLoading(false);
+            }}
+            disabled={gameState.isLoading || showLoading}
             className="button-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {gameState.isLoading ? 'Cargando cancións...' : 'Comezar a xogar'}
+            {gameState.isLoading || showLoading ? 'Estou buscando cancións...' : 'Comezar a xogar'}
           </button>
+import { useState } from 'react'
+  const [showLoading, setShowLoading] = useState(false);
           
           {/* Debug info */}
           <div className="mt-4 text-xs text-gray-400 text-center">
