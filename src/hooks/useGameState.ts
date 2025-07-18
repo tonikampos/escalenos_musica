@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Song, GameState, GameStats } from '../types/xogo'
-import { lastfmService } from '../services/lastfmService'
+import { youtubeMusicService } from '../services/youtubeMusicService'
+import { spotifyService } from '../services/spotifyService'
 
 // Estado inicial del juego
 const INITIAL_STATE: GameState = {
@@ -18,7 +19,6 @@ const INITIAL_STATE: GameState = {
   category: 'pop'
 }
 
-// Estadísticas iniciales
 const INITIAL_STATS: GameStats = {
   totalGames: 0,
   bestScore: 0,
@@ -35,161 +35,53 @@ export const useGameState = () => {
     return saved ? JSON.parse(saved) : INITIAL_STATS
   })
 
-
-
-  // Función para limpiar caché (para usar desde consola)
-  const clearCache = useCallback(() => {
-    localStorage.removeItem('musicguess-songs-cache')
-    localStorage.removeItem('musicguess-cache-timestamp')
-    console.log('🧹 Caché limpiado. Recarga la aplicación para cargar canciones nuevas.')
-  }, [])
-
-  // Cargar canciones REALES de artistas específicos usando YouTube
-  const loadSongs = useCallback(async () => {
+  // Cargar canciones desde YouTube y Spotify
+  const loadSongs = useCallback(async (category: string = 'pop') => {
     setGameState(prev => ({ ...prev, isLoading: true }))
-    
-      console.log('🎵 CARGANDO CANCIÓNS DE ARTISTAS ESPECÍFICOS')
-      console.log('🎯 Buscando cancións de artistas seleccionados...')
-      console.log('🔧 DEPURACIÓN: Netlify Environment Check:')
-      console.log('   - API Key existe:', !!import.meta.env.VITE_YOUTUBE_API_KEY)
-      console.log('   - Longitud API Key:', import.meta.env.VITE_YOUTUBE_API_KEY?.length || 0)
-      
-      try {
-      // Verificar caché primero
-      const cachedSongs = localStorage.getItem('musicguess-songs-cache')
-      const cacheTimestamp = localStorage.getItem('musicguess-cache-timestamp')
-      const oneDayInMs = 24 * 60 * 60 * 1000
-      
-      if (cachedSongs && cacheTimestamp) {
-        const cacheAge = Date.now() - parseInt(cacheTimestamp)
-        if (cacheAge < oneDayInMs) {
-          console.log('✅ Usando cancións do caché (válidas por 24h)')
-          const songs = JSON.parse(cachedSongs)
-          setAvailableSongs(songs)
-          setGameState(prev => ({ ...prev, isLoading: false }))
-          return
-        }
-      }
-      
-      // Verificar si tenemos API key de Last.fm
-      if (!lastfmService.hasApiKey()) {
-        console.log('⚠️ No hay API key de Last.fm, usando fallback')
-        throw new Error('No Last.fm API key configured')
-      }
-      
-      console.log('🔍 Iniciando búsqueda con Last.fm SOLAMENTE')
+    let songs: Song[] = []
+    try {
+      // 1. Buscar canciones populares en Spotify
+      const spotifyTracks = await spotifyService.getRandomTracks(category, 10)
+      const spotifySongs: Song[] = spotifyTracks
+        .filter(track => !!track.preview_url)
+        .map(track => ({
+          id: track.id,
+          title: track.name,
+          artist: track.artists[0]?.name || '',
+          previewUrl: track.preview_url || '',
+          albumCover: track.album.images[0]?.url || ''
+        }))
 
-      // Lista de artistas específicos que quieres + artistas más escuchados actuales
-      const artistasEspecificos = [
-        // Artistas específicos originales (13 artistas españoles - TODOS MANTENIDOS)
-        'ARDE BOGOTÁ',
-        'SHINOVA', 
-        'SILOE',
-        'VIVA SUECIA',
-        'HERDEIROS DA CRUZ',
-        'VETUSTA MORLA',
-        'IZAL',
-        'DORIAN',
-        'SIDONIE',
-        'PARACETAFOLK',
-        'FILLAS DE CASANDRA',
-        'TANXUGUEIRAS',
-        'LOQUILLO',
-        
-        // Top artistas internacionales más escuchados (reducido a 4 para optimizar cuota)
-        'Bad Bunny',
-        'Taylor Swift',
-        'The Weeknd',
-        'Billie Eilish'
-      ]
-
-      let tracks: any[] = []
-      
-      // Buscar canciones de cada artista específico
-      for (const artist of artistasEspecificos) {
-        try {
-          console.log(`🎤 Buscando as mellores cancións de: ${artist}`)
-          const artistTracks = await lastfmService.getArtistTopTracks(artist, 3)
-          tracks = [...tracks, ...artistTracks]
-          
-          console.log(`✅ Encontradas ${artistTracks.length} cancións de ${artist}`)
-          
-          // Pequeña pausa para evitar rate limiting
-          await new Promise(resolve => setTimeout(resolve, 300))
-          
-        } catch (error) {
-          console.log(`❌ Error buscando ${artist}:`, error)
-          
-          // Intentar búsqueda alternativa si falla
-          try {
-            console.log(`🔄 Intentando búsqueda alternativa para ${artist}`)
-            const alternativeTracks = await lastfmService.searchTrack(`${artist} mellor canción`, 5)
-            tracks = [...tracks, ...alternativeTracks]
-          } catch (altError) {
-            console.log(`❌ También falló a búsqueda alternativa para ${artist}`)
-          }
-        }
-      }
-
-      console.log('📊 Total de tracks encontrados:', tracks.length)
-      
-      if (tracks.length === 0) {
-        throw new Error('Non se encontraron cancións dos artistas especificados')
-      }
-
-      // Convertir a nuestro formato
-      const songs = tracks.map(track => ({
+      // 2. Buscar canciones populares en YouTube
+      const youtubeTracks = await youtubeMusicService.searchByCategory(category, 10)
+      const youtubeSongs: Song[] = youtubeTracks.map(track => ({
         id: track.id,
-        title: track.name,
-        artist: track.artist.name,
-        previewUrl: track.url, // Usar la URL de Last.fm (puede ser preview o enlace)
-        albumCover: track.image?.find((img: any) => img.size === 'large')?.['#text'] || '',
+        title: track.title,
+        artist: track.artist,
+        previewUrl: track.audioUrl || '',
+        albumCover: track.thumbnailUrl || ''
       }))
-      
-      // Filtrar duplicados por título y artista
-      const uniqueSongs = songs.filter((song, index, self) => 
-        index === self.findIndex(s => 
-          s.title.toLowerCase() === song.title.toLowerCase() && 
-          s.artist.toLowerCase() === song.artist.toLowerCase()
-        )
-      )
-      
-      console.log(`✅ Cancións únicas encontradas: ${uniqueSongs.length}`)
-      console.log('📋 Mostra de cancións encontradas:')
-      uniqueSongs.slice(0, 10).forEach((song, i) => {
-        console.log(`${i + 1}. ${song.title} - ${song.artist}`)
-      })
 
-      if (uniqueSongs.length < 4) {
-        throw new Error(`Solo ${uniqueSongs.length} cancións encontradas, necesitamos polo menos 4`)
+      // 3. Unir y filtrar duplicados
+      songs = [...spotifySongs, ...youtubeSongs].filter(song => song.previewUrl)
+      songs = songs.filter((song, idx, arr) =>
+        arr.findIndex(s => s.title.toLowerCase() === song.title.toLowerCase() && s.artist.toLowerCase() === song.artist.toLowerCase()) === idx
+      )
+
+      // 4. Si no hay suficientes canciones, usar fallback
+      if (songs.length < 4) {
+        throw new Error('Non se encontraron cancións suficientes en Spotify/YouTube')
       }
 
-      // Mezclar las canciones - tomar todas las encontradas (sin límite específico)
-      const shuffledSongs = uniqueSongs.sort(() => Math.random() - 0.5)
-      
-      // Guardar en caché por 24 horas
+      // 5. Mezclar canciones
+      const shuffledSongs = songs.sort(() => Math.random() - 0.5)
+      setAvailableSongs(shuffledSongs)
       localStorage.setItem('musicguess-songs-cache', JSON.stringify(shuffledSongs))
       localStorage.setItem('musicguess-cache-timestamp', Date.now().toString())
-      
-      setAvailableSongs(shuffledSongs)
-      console.log(`✅ ÉXITO: ${shuffledSongs.length} cancións dos teus artistas favoritos cargadas e gardadas no caché`)
-      
-      // Mostrar estadísticas por artista
-      const artistStats = artistasEspecificos.map(artist => {
-        const count = shuffledSongs.filter(song => 
-          song.artist.toLowerCase().includes(artist.toLowerCase())
-        ).length
-        return `${artist}: ${count} cancións`
-      })
-      console.log('📊 Cancións por artista:')
-      artistStats.forEach(stat => console.log(`   ${stat}`))
-      
+      console.log(`✅ ${shuffledSongs.length} cancións cargadas de Spotify/YouTube`)
     } catch (error) {
-      console.error('❌ Error cargando cancións de artistas específicos:', error)
-      
-      // Fallback: Usar canciones conocidas de algunos de estos artistas
-      console.log('🔄 Usando fallback con cancións coñecidas dos teus artistas...')
-      
+      // Fallback: canciones de ejemplo
+      console.error('❌ Error cargando cancións:', error)
       const fallbackSongs: Song[] = [
         {
           id: 'sample1',
@@ -248,126 +140,94 @@ export const useGameState = () => {
           albumCover: 'https://img.youtube.com/vi/YQHsXMglC9A/maxresdefault.jpg'
         }
       ]
-      
-      console.log('📝 Usando cancións coñecidas dos teus artistas:', fallbackSongs.length)
       setAvailableSongs(fallbackSongs)
     }
-    
     setGameState(prev => ({ ...prev, isLoading: false }))
   }, [])
 
   // Iniciar juego
-  const startGame = useCallback(async (difficulty: 'easy' | 'medium' | 'hard' = 'medium') => {
+  const startGame = useCallback(async (difficulty: 'easy' | 'medium' | 'hard' = 'medium', category: string = 'pop') => {
     if (availableSongs.length === 0) {
-      await loadSongs()
+      await loadSongs(category)
     }
-
     const songs = availableSongs.length > 0 ? availableSongs : []
     if (songs.length < 4) {
       console.error('Not enough songs to start game')
       return
     }
-
     const randomSong = songs[Math.floor(Math.random() * songs.length)]
     const wrongOptions = songs
-      .filter(s => s.id !== randomSong.id)
+      .filter((s: Song) => s.id !== randomSong.id)
       .sort(() => Math.random() - 0.5)
       .slice(0, 3)
-
-    const allOptions = [randomSong, ...wrongOptions].sort(() => Math.random() - 0.5)
-
-    console.log('🎮 DEPURACIÓN DEL JUEGO:')
-    console.log('🎵 Canción seleccionada:', randomSong.title, '-', randomSong.artist)
-    console.log('🎲 Opciones incorrectas:', wrongOptions.map(s => `${s.title} - ${s.artist}`))
-    console.log('📋 Todas las opciones:', allOptions.map(s => `${s.title} - ${s.artist}`))
-
-    setGameState(prev => ({
-      ...prev,
-      gameStarted: true,
+    const shuffledOptions = [randomSong, ...wrongOptions].sort(() => Math.random() - 0.5)
+    const maxRounds = difficulty === 'easy' ? 5 : difficulty === 'medium' ? 10 : 15
+    setGameState({
+      ...INITIAL_STATE,
       currentSong: randomSong,
-      options: allOptions,
-      selectedAnswer: null,
-      showAnswer: false,
-      difficulty
-    }))
+      options: shuffledOptions,
+      round: 1,
+      gameStarted: true,
+      maxRounds,
+      difficulty,
+      category
+    })
   }, [availableSongs, loadSongs])
-
-  // Seleccionar respuesta
-  const selectAnswer = useCallback((songId: string) => {
-    setGameState(prev => ({
-      ...prev,
-      selectedAnswer: songId,
-      showAnswer: true
-    }))
-  }, [])
 
   // Siguiente ronda
   const nextRound = useCallback(() => {
     if (gameState.round >= gameState.maxRounds) {
-      endGame()
+      // Fin del juego - actualizar estadísticas
+      const newStats = {
+        ...stats,
+        totalGames: stats.totalGames + 1,
+        bestScore: Math.max(stats.bestScore, gameState.score),
+        correctAnswers: stats.correctAnswers + gameState.score,
+        totalAnswers: stats.totalAnswers + gameState.maxRounds,
+        averageScore: Math.round(((stats.averageScore * stats.totalGames) + gameState.score) / (stats.totalGames + 1))
+      }
+      setStats(newStats)
+      localStorage.setItem('musicguess-stats', JSON.stringify(newStats))
+      setGameState(INITIAL_STATE)
       return
     }
-
     const songs = availableSongs
     const randomSong = songs[Math.floor(Math.random() * songs.length)]
     const wrongOptions = songs
-      .filter(s => s.id !== randomSong.id)
+      .filter((s: Song) => s.id !== randomSong.id)
       .sort(() => Math.random() - 0.5)
       .slice(0, 3)
-
-    const allOptions = [randomSong, ...wrongOptions].sort(() => Math.random() - 0.5)
-
-    console.log('🎮 DEPURACIÓN SIGUIENTE RONDA:')
-    console.log('🎵 Nueva canción:', randomSong.title, '-', randomSong.artist)
-    console.log('🎲 Opciones incorrectas:', wrongOptions.map(s => `${s.title} - ${s.artist}`))
-    console.log('📋 Todas las opciones:', allOptions.map(s => `${s.title} - ${s.artist}`))
-
-    const isCorrect = gameState.selectedAnswer === gameState.currentSong?.id
-    const newScore = isCorrect ? gameState.score + 1 : gameState.score
-
+    const shuffledOptions = [randomSong, ...wrongOptions].sort(() => Math.random() - 0.5)
     setGameState(prev => ({
       ...prev,
       currentSong: randomSong,
-      options: allOptions,
+      options: shuffledOptions,
       selectedAnswer: null,
       showAnswer: false,
-      score: newScore,
       round: prev.round + 1,
-      isPlaying: true // ✅ Reproducir automáticamente a seguinte canción
-    }))
-  }, [gameState, availableSongs])
-
-  // Finalizar juego
-  const endGame = useCallback(() => {
-    const isCorrect = gameState.selectedAnswer === gameState.currentSong?.id
-    const finalScore = isCorrect ? gameState.score + 1 : gameState.score
-
-    // Actualizar estadísticas
-    const newStats = {
-      totalGames: stats.totalGames + 1,
-      bestScore: Math.max(stats.bestScore, finalScore),
-      averageScore: ((stats.averageScore * stats.totalGames) + finalScore) / (stats.totalGames + 1),
-      correctAnswers: stats.correctAnswers + finalScore,
-      totalAnswers: stats.totalAnswers + gameState.maxRounds
-    }
-
-    setStats(newStats)
-    localStorage.setItem('musicguess-stats', JSON.stringify(newStats))
-
-    setGameState(prev => ({
-      ...prev,
-      gameStarted: false,
-      score: finalScore,
       isPlaying: false
     }))
-  }, [gameState, stats])
+  }, [gameState.round, gameState.maxRounds, gameState.score, stats, availableSongs])
 
-  // Reiniciar juego
+  // Seleccionar respuesta
+  const selectAnswer = useCallback((songId: string) => {
+    if (gameState.showAnswer) return
+    const isCorrect = songId === gameState.currentSong?.id
+    setGameState(prev => ({
+      ...prev,
+      selectedAnswer: songId,
+      showAnswer: true,
+      score: isCorrect ? prev.score + 1 : prev.score,
+      isPlaying: false
+    }))
+  }, [gameState.showAnswer, gameState.currentSong?.id])
+
+  // Resetear juego
   const resetGame = useCallback(() => {
     setGameState(INITIAL_STATE)
   }, [])
 
-  // Controlar reproducción
+  // Alternar reproducción
   const togglePlay = useCallback(() => {
     setGameState(prev => ({
       ...prev,
@@ -375,22 +235,41 @@ export const useGameState = () => {
     }))
   }, [])
 
+  // Actualizar configuración
+  const updateSettings = useCallback((difficulty: 'easy' | 'medium' | 'hard', category: string) => {
+    setGameState(prev => ({
+      ...prev,
+      difficulty,
+      category
+    }))
+  }, [])
+
   // Cargar canciones al montar el componente
   useEffect(() => {
-    loadSongs()
-  }, [loadSongs])
+    if (availableSongs.length === 0) {
+      loadSongs('pop')
+    }
+  }, [availableSongs.length, loadSongs])
+
+  // Limpiar caché manualmente
+  const clearCache = useCallback(() => {
+    localStorage.removeItem('musicguess-songs-cache')
+    localStorage.removeItem('musicguess-cache-timestamp')
+    setAvailableSongs([])
+    setGameState(INITIAL_STATE)
+  }, [])
 
   return {
     gameState,
-    availableSongs,
     stats,
+    availableSongs,
     startGame,
-    selectAnswer,
     nextRound,
-    endGame,
+    selectAnswer,
     resetGame,
     togglePlay,
     loadSongs,
-    clearCache
+    clearCache,
+    updateSettings
   }
 }

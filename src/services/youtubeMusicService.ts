@@ -180,4 +180,4 @@ class YouTubeMusicService {
   }
 }
 
-// export const youtubeMusicService = new YouTubeMusicService()
+export const youtubeMusicService = new YouTubeMusicService()
