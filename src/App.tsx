@@ -56,7 +56,7 @@ function App() {
   // Pantalla de inicio
   if (!gameState.gameStarted) {
     // Detectar si no hay canciones válidas en la fuente seleccionada
-    const noSongsAvailable = !gameState.isLoading && availableSongs.length === 0
+    const noSongsAvailable = !gameState.isLoading && availableSongs.length === 0;
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center max-w-md w-full">
@@ -75,10 +75,9 @@ function App() {
           {noSongsAvailable && (
             <div className="mb-6 p-4 rounded-xl bg-red-100 text-red-700 text-sm">
               <strong>No se encontraron previews de canciones en la fuente seleccionada ({musicSource.charAt(0).toUpperCase() + musicSource.slice(1)}).</strong>
-              <div>Prueba cambiando a otra fuente (Spotify, YouTube o Deezer) para más variedad de previews.</div>
+              <div>Prueba cambiando a otra fonte (Spotify, YouTube o Deezer) para máis variedade de previews.</div>
             </div>
           )}
-
           {/* Configuración del juego: selector de fuente de música */}
           <div className="glass-effect rounded-2xl p-6 mb-6">
             <div className="flex items-center mb-4">
@@ -87,7 +86,7 @@ function App() {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Fuente de música</label>
+                <label className="block text-sm font-medium mb-2">Fonte de música</label>
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${musicSource === 'spotify' ? 'bg-spotify-green text-white' : 'glass-effect hover:bg-white/20'}`}
@@ -114,7 +113,6 @@ function App() {
               </div>
             </div>
           </div>
-
           {/* Cómo jugar */}
           <div className="glass-effect rounded-2xl p-6 mb-6">
             <h2 className="text-xl font-semibold mb-4">Como xogar</h2>
@@ -133,7 +131,6 @@ function App() {
               </div>
             </div>
           </div>
-
           {/* Estadísticas */}
           {stats.totalGames > 0 && (
             <div className="glass-effect rounded-2xl p-6 mb-6">
@@ -163,10 +160,8 @@ function App() {
               </div>
             </div>
           )}
-
           <button
             onClick={async () => {
-              // Mostrar mensaje de carga
               setShowLoading(true);
               await startGame(gameState.difficulty);
               setShowLoading(false);
@@ -176,10 +171,9 @@ function App() {
           >
             {gameState.isLoading || showLoading ? 'Estou buscando cancións...' : 'Comezar a xogar'}
           </button>
-import { useState } from 'react'
-  const [showLoading, setShowLoading] = useState(false);
-          >
-            {gameState.isLoading || showLoading ? 'Estou buscando cancións...' : 'Comezar a xogar'}
+        </div>
+      </div>
+    );
   }
 
   // Pantalla de juego
