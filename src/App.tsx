@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-  const [showLoading, setShowLoading] = useState(false);
 import { Music, Play, Pause, Volume2, RotateCcw, Star, Settings, Trophy } from 'lucide-react'
 import { useGameState } from './hooks/useGameState'
 
 function App() {
+  const [showLoading, setShowLoading] = useState(false);
   const {
+  const [showLoading, setShowLoading] = useState(false);
     gameState,
     stats,
     availableSongs,
