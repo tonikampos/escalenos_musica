@@ -85,59 +85,59 @@ export const useGameState = () => {
       const fallbackSongs: Song[] = [
         {
           id: 'sample1',
-          title: 'Los Perros',
-          artist: 'Vetusta Morla',
-          previewUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&start=30&end=50&controls=0',
-          albumCover: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg'
+          title: 'Blinding Lights',
+          artist: 'The Weeknd',
+          previewUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
+          albumCover: 'https://i.scdn.co/image/ab67616d0000b27396ca2b2ac0e4ad5e2f8c4c10'
         },
         {
           id: 'sample2',
-          title: 'Copacabana',
-          artist: 'Izal',
-          previewUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk?autoplay=1&start=30&end=50&controls=0',
-          albumCover: 'https://img.youtube.com/vi/kJQP7kiw5Fk/maxresdefault.jpg'
+          title: 'Shape of You',
+          artist: 'Ed Sheeran',
+          previewUrl: 'https://sample-videos.com/zip/10/mp3/mp3-15s/SampleAudio_0.4mb_mp3.mp3',
+          albumCover: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96'
         },
         {
           id: 'sample3',
-          title: 'Caballero',
-          artist: 'Dorian',
-          previewUrl: 'https://www.youtube.com/embed/9bZkp7q19f0?autoplay=1&start=30&end=50&controls=0',
-          albumCover: 'https://img.youtube.com/vi/9bZkp7q19f0/maxresdefault.jpg'
+          title: 'Bad Guy',
+          artist: 'Billie Eilish',
+          previewUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
+          albumCover: 'https://i.scdn.co/image/ab67616d0000b273a8cc2d73b5ddaa5e8b2e7b9f'
         },
         {
           id: 'sample4',
-          title: 'Fascinado',
-          artist: 'Sidonie',
-          previewUrl: 'https://www.youtube.com/embed/fJ9rUzIMcZQ?autoplay=1&start=30&end=50&controls=0',
-          albumCover: 'https://img.youtube.com/vi/fJ9rUzIMcZQ/maxresdefault.jpg'
+          title: 'Watermelon Sugar',
+          artist: 'Harry Styles',
+          previewUrl: 'https://sample-videos.com/zip/10/mp3/mp3-15s/SampleAudio_0.4mb_mp3.mp3',
+          albumCover: 'https://i.scdn.co/image/ab67616d0000b273adce9b0e8b889f4d8f1aa'
         },
         {
           id: 'sample5',
-          title: 'Terra',
-          artist: 'Tanxugueiras',
-          previewUrl: 'https://www.youtube.com/embed/60ItHLz5WEA?autoplay=1&start=30&end=50&controls=0',
-          albumCover: 'https://img.youtube.com/vi/60ItHLz5WEA/maxresdefault.jpg'
+          title: 'Levitating',
+          artist: 'Dua Lipa',
+          previewUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
+          albumCover: 'https://i.scdn.co/image/ab67616d0000b273c1b7dc6c6a8b4e6e88a2a7d4'
         },
         {
           id: 'sample6',
-          title: 'Cadenas',
-          artist: 'Loquillo',
-          previewUrl: 'https://www.youtube.com/embed/JGwWNGJdvx8?autoplay=1&start=30&end=50&controls=0',
-          albumCover: 'https://img.youtube.com/vi/JGwWNGJdvx8/maxresdefault.jpg'
+          title: 'Stay',
+          artist: 'The Kid LAROI & Justin Bieber',
+          previewUrl: 'https://sample-videos.com/zip/10/mp3/mp3-15s/SampleAudio_0.4mb_mp3.mp3',
+          albumCover: 'https://i.scdn.co/image/ab67616d0000b273b1b7dc6c6a8b4e6e88a2a7d4'
         },
         {
           id: 'sample7',
-          title: 'Antartida',
-          artist: 'Shinova',
-          previewUrl: 'https://www.youtube.com/embed/hTWKbfoikeg?autoplay=1&start=30&end=50&controls=0',
-          albumCover: 'https://img.youtube.com/vi/hTWKbfoikeg/maxresdefault.jpg'
+          title: 'Peaches',
+          artist: 'Justin Bieber',
+          previewUrl: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3',
+          albumCover: 'https://i.scdn.co/image/ab67616d0000b273a1b7dc6c6a8b4e6e88a2a7d4'
         },
         {
           id: 'sample8',
-          title: 'Otros Aires',
-          artist: 'Viva Suecia',
-          previewUrl: 'https://www.youtube.com/embed/YQHsXMglC9A?autoplay=1&start=30&end=50&controls=0',
-          albumCover: 'https://img.youtube.com/vi/YQHsXMglC9A/maxresdefault.jpg'
+          title: 'Good 4 U',
+          artist: 'Olivia Rodrigo',
+          previewUrl: 'https://sample-videos.com/zip/10/mp3/mp3-15s/SampleAudio_0.4mb_mp3.mp3',
+          albumCover: 'https://i.scdn.co/image/ab67616d0000b27391b7dc6c6a8b4e6e88a2a7d4'
         }
       ]
       setAvailableSongs(fallbackSongs)
