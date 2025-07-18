@@ -12,8 +12,15 @@ function App() {
     selectAnswer,
     resetGame,
     togglePlay,
-    loadSongs
+    loadSongs,
+    clearCache
   } = useGameState()
+
+  // Hacer clearCache accesible globalmente para depuración
+  useEffect(() => {
+    (window as any).clearMusicCache = clearCache
+    console.log('🔧 Para limpiar el caché, usa: window.clearMusicCache()')
+  }, [clearCache])
 
   const audioRef = useRef<HTMLAudioElement>(null)
 

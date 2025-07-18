@@ -44,12 +44,22 @@ export const useGameState = () => {
     albumCover: track.thumbnailUrl
   })
 
+  // Función para limpiar caché (para usar desde consola)
+  const clearCache = useCallback(() => {
+    localStorage.removeItem('musicguess-songs-cache')
+    localStorage.removeItem('musicguess-cache-timestamp')
+    console.log('🧹 Caché limpiado. Recarga la aplicación para cargar canciones nuevas.')
+  }, [])
+
   // Cargar canciones REALES de artistas específicos usando YouTube
   const loadSongs = useCallback(async () => {
     setGameState(prev => ({ ...prev, isLoading: true }))
     
       console.log('🎵 CARGANDO CANCIÓNS DE ARTISTAS ESPECÍFICOS')
       console.log('🎯 Buscando cancións de artistas seleccionados...')
+      console.log('🔧 DEPURACIÓN: Netlify Environment Check:')
+      console.log('   - API Key existe:', !!import.meta.env.VITE_YOUTUBE_API_KEY)
+      console.log('   - Longitud API Key:', import.meta.env.VITE_YOUTUBE_API_KEY?.length || 0)
       
       try {
       // Verificar caché primero
@@ -265,6 +275,11 @@ export const useGameState = () => {
 
     const allOptions = [randomSong, ...wrongOptions].sort(() => Math.random() - 0.5)
 
+    console.log('🎮 DEPURACIÓN DEL JUEGO:')
+    console.log('🎵 Canción seleccionada:', randomSong.title, '-', randomSong.artist)
+    console.log('🎲 Opciones incorrectas:', wrongOptions.map(s => `${s.title} - ${s.artist}`))
+    console.log('📋 Todas las opciones:', allOptions.map(s => `${s.title} - ${s.artist}`))
+
     setGameState(prev => ({
       ...prev,
       gameStarted: true,
@@ -300,6 +315,11 @@ export const useGameState = () => {
       .slice(0, 3)
 
     const allOptions = [randomSong, ...wrongOptions].sort(() => Math.random() - 0.5)
+
+    console.log('🎮 DEPURACIÓN SIGUIENTE RONDA:')
+    console.log('🎵 Nueva canción:', randomSong.title, '-', randomSong.artist)
+    console.log('🎲 Opciones incorrectas:', wrongOptions.map(s => `${s.title} - ${s.artist}`))
+    console.log('📋 Todas las opciones:', allOptions.map(s => `${s.title} - ${s.artist}`))
 
     const isCorrect = gameState.selectedAnswer === gameState.currentSong?.id
     const newScore = isCorrect ? gameState.score + 1 : gameState.score
@@ -369,6 +389,7 @@ export const useGameState = () => {
     endGame,
     resetGame,
     togglePlay,
-    loadSongs
+    loadSongs,
+    clearCache
   }
 }
