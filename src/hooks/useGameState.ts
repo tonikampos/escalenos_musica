@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Song, GameState, GameStats } from '../types/xogo'
-import { youtubeMusicService } from '../services/youtubeMusicService'
+import { lastfmOnlyService } from '../services/lastfmOnlyService'
 
 // Estado inicial del juego
 const INITIAL_STATE: GameState = {
@@ -35,13 +35,13 @@ export const useGameState = () => {
     return saved ? JSON.parse(saved) : INITIAL_STATS
   })
 
-  // Función para convertir YouTubeTrack a Song
-  const convertYouTubeTrack = (track: any): Song => ({
+  // Función para convertir LastFmOnlyTrack a Song
+  const convertLastFmTrack = (track: any): Song => ({
     id: track.id,
     title: track.title,
     artist: track.artist,
-    previewUrl: youtubeMusicService.getEmbedAudioUrl(track.id),
-    albumCover: track.thumbnailUrl
+    previewUrl: track.previewUrl,
+    albumCover: track.albumCover
   })
 
   // Función para limpiar caché (para usar desde consola)
@@ -78,11 +78,13 @@ export const useGameState = () => {
         }
       }
       
-      // Verificar si tenemos API key de YouTube
-      if (!youtubeMusicService.hasApiKey()) {
-        console.log('⚠️ No hay API key de YouTube, usando fallback')
-        throw new Error('No YouTube API key configured')
+      // Verificar si tenemos API key de Last.fm
+      if (!lastfmOnlyService.hasApiKey()) {
+        console.log('⚠️ No hay API key de Last.fm, usando fallback')
+        throw new Error('No Last.fm API key configured')
       }
+      
+      console.log('🔍 Iniciando búsqueda con Last.fm SOLAMENTE')
 
       // Lista de artistas específicos que quieres + artistas más escuchados actuales
       const artistasEspecificos = [
@@ -114,7 +116,7 @@ export const useGameState = () => {
       for (const artist of artistasEspecificos) {
         try {
           console.log(`🎤 Buscando as mellores cancións de: ${artist}`)
-          const artistTracks = await youtubeMusicService.searchByArtist(artist, 3) // Reducido a 3 canciones por artista
+          const artistTracks = await lastfmOnlyService.getArtistTopTracks(artist, 3) // Reducido a 3 canciones por artista
           tracks = [...tracks, ...artistTracks]
           
           console.log(`✅ Encontradas ${artistTracks.length} cancións de ${artist}`)
@@ -128,7 +130,7 @@ export const useGameState = () => {
           // Intentar búsqueda alternativa si falla
           try {
             console.log(`🔄 Intentando búsqueda alternativa para ${artist}`)
-            const alternativeTracks = await youtubeMusicService.searchTracks(`${artist} mellor canción`, 5)
+            const alternativeTracks = await lastfmOnlyService.searchTracks(`${artist} mellor canción`, 5)
             tracks = [...tracks, ...alternativeTracks]
           } catch (altError) {
             console.log(`❌ También falló a búsqueda alternativa para ${artist}`)
@@ -143,7 +145,7 @@ export const useGameState = () => {
       }
 
       // Convertir a nuestro formato
-      const songs = tracks.map(convertYouTubeTrack)
+      const songs = tracks.map(convertLastFmTrack)
       
       // Filtrar duplicados por título y artista
       const uniqueSongs = songs.filter((song, index, self) => 
