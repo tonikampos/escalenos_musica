@@ -178,11 +178,8 @@ function App() {
           </button>
 import { useState } from 'react'
   const [showLoading, setShowLoading] = useState(false);
-          
-
-        </div>
-      </div>
-    )
+          >
+            {gameState.isLoading || showLoading ? 'Estou buscando cancións...' : 'Comezar a xogar'}
   }
 
   // Pantalla de juego
