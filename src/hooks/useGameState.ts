@@ -146,71 +146,71 @@ export const useGameState = () => {
           id: 'fallback1',
           title: 'Blinding Lights',
           artist: 'The Weeknd',
-          previewUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b27396ca2b2ac0e4ad5e2f8c4c10'
+          previewUrl: 'https://file-examples.com/storage/fe86e7b6b54c9b3dce6a4c4/2017/11/file_example_MP3_700KB.mp3',
+          albumCover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop'
         },
         {
           id: 'fallback2',
           title: 'Shape of You',
           artist: 'Ed Sheeran',
-          previewUrl: 'https://file-examples.com/storage/fe86e7b6b54c9b3dce6a4c4/2017/11/file_example_MP3_700KB.mp3',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96'
+          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3',
+          albumCover: 'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=300&h=300&fit=crop'
         },
         {
           id: 'fallback3',
           title: 'Bad Guy',
           artist: 'Billie Eilish',
-          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b273a8cc2d73b5ddaa5e8b2e7b9f'
+          previewUrl: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
+          albumCover: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'
         },
         {
           id: 'fallback4',
           title: 'Watermelon Sugar',
           artist: 'Harry Styles',
-          previewUrl: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b273adce9b0e8b889f4d8f1aa'
+          previewUrl: 'https://file-examples.com/storage/fe86e7b6b54c9b3dce6a4c4/2017/11/file_example_MP3_1MG.mp3',
+          albumCover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop'
         },
         {
           id: 'fallback5',
           title: 'Levitating',
           artist: 'Dua Lipa',
-          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b273c1b7dc6c6a8b4e6e88a2a7d4'
+          previewUrl: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg',
+          albumCover: 'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=300&h=300&fit=crop'
         },
         {
           id: 'fallback6',
           title: 'As It Was',
           artist: 'Harry Styles',
-          previewUrl: 'https://file-examples.com/storage/fe86e7b6b54c9b3dce6a4c4/2017/11/file_example_MP3_1MG.mp3',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b273be82b9f0b9c4e5e8b2e7b9f'
+          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3',
+          albumCover: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'
         },
         {
           id: 'fallback7',
           title: 'Stay',
           artist: 'The Kid LAROI & Justin Bieber',
-          previewUrl: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b273a1b7dc6c6a8b4e6e88a2a7d4'
+          previewUrl: 'https://file-examples.com/storage/fe86e7b6b54c9b3dce6a4c4/2017/11/file_example_MP3_700KB.mp3',
+          albumCover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop'
         },
         {
           id: 'fallback8',
           title: 'Heat Waves',
           artist: 'Glass Animals',
-          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b27391b7dc6c6a8b4e6e88a2a7d4'
+          previewUrl: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
+          albumCover: 'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=300&h=300&fit=crop'
         },
         {
           id: 'fallback9',
           title: 'Anti-Hero',
           artist: 'Taylor Swift',
-          previewUrl: 'https://file-examples.com/storage/fe86e7b6b54c9b3dce6a4c4/2017/11/file_example_MP3_700KB.mp3',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b27381b7dc6c6a8b4e6e88a2a7d4'
+          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3',
+          albumCover: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'
         },
         {
           id: 'fallback10',
           title: 'Flowers',
           artist: 'Miley Cyrus',
-          previewUrl: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
-          albumCover: 'https://i.scdn.co/image/ab67616d0000b27371b7dc6c6a8b4e6e88a2a7d4'
+          previewUrl: 'https://file-examples.com/storage/fe86e7b6b54c9b3dce6a4c4/2017/11/file_example_MP3_1MG.mp3',
+          albumCover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop'
         }
       ]
       
