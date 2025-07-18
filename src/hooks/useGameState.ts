@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Song, GameState, GameStats } from '../types/xogo'
-import { lastfmOnlyService } from '../services/lastfmOnlyService'
+import { lastfmService } from '../services/lastfmService'
 
 // Estado inicial del juego
 const INITIAL_STATE: GameState = {
@@ -35,14 +35,7 @@ export const useGameState = () => {
     return saved ? JSON.parse(saved) : INITIAL_STATS
   })
 
-  // Función para convertir LastFmOnlyTrack a Song
-  const convertLastFmTrack = (track: any): Song => ({
-    id: track.id,
-    title: track.title,
-    artist: track.artist,
-    previewUrl: track.previewUrl,
-    albumCover: track.albumCover
-  })
+
 
   // Función para limpiar caché (para usar desde consola)
   const clearCache = useCallback(() => {
@@ -79,7 +72,7 @@ export const useGameState = () => {
       }
       
       // Verificar si tenemos API key de Last.fm
-      if (!lastfmOnlyService.hasApiKey()) {
+      if (!lastfmService.hasApiKey()) {
         console.log('⚠️ No hay API key de Last.fm, usando fallback')
         throw new Error('No Last.fm API key configured')
       }
@@ -116,7 +109,7 @@ export const useGameState = () => {
       for (const artist of artistasEspecificos) {
         try {
           console.log(`🎤 Buscando as mellores cancións de: ${artist}`)
-          const artistTracks = await lastfmOnlyService.getArtistTopTracks(artist, 3) // Reducido a 3 canciones por artista
+          const artistTracks = await lastfmService.getArtistTopTracks(artist, 3)
           tracks = [...tracks, ...artistTracks]
           
           console.log(`✅ Encontradas ${artistTracks.length} cancións de ${artist}`)
@@ -130,7 +123,7 @@ export const useGameState = () => {
           // Intentar búsqueda alternativa si falla
           try {
             console.log(`🔄 Intentando búsqueda alternativa para ${artist}`)
-            const alternativeTracks = await lastfmOnlyService.searchTracks(`${artist} mellor canción`, 5)
+            const alternativeTracks = await lastfmService.searchTrack(`${artist} mellor canción`, 5)
             tracks = [...tracks, ...alternativeTracks]
           } catch (altError) {
             console.log(`❌ También falló a búsqueda alternativa para ${artist}`)
@@ -145,7 +138,13 @@ export const useGameState = () => {
       }
 
       // Convertir a nuestro formato
-      const songs = tracks.map(convertLastFmTrack)
+      const songs = tracks.map(track => ({
+        id: track.id,
+        title: track.name,
+        artist: track.artist.name,
+        previewUrl: track.url, // Usar la URL de Last.fm (puede ser preview o enlace)
+        albumCover: track.image?.find((img: any) => img.size === 'large')?.['#text'] || '',
+      }))
       
       // Filtrar duplicados por título y artista
       const uniqueSongs = songs.filter((song, index, self) => 
