@@ -7,6 +7,11 @@ export const deezerService = {
     const url = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=${limit}`
     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}` // Evitar CORS en local
     const res = await fetch(proxyUrl)
+    if (res.status === 403) {
+      // Deezer bloqueado por CORS o región
+      window.localStorage.setItem('musicguess-deezer-blocked', '1');
+      throw new Error('Deezer bloqueado por CORS o región. Prueba con otra fuente.');
+    }
     if (!res.ok) throw new Error('Error consultando Deezer')
     const data = await res.json()
     return (data.data || [])

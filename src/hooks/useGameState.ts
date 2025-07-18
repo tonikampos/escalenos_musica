@@ -44,6 +44,13 @@ export const useGameState = () => {
   const loadSongs = useCallback(async (category: string = 'pop') => {
     setGameState(prev => ({ ...prev, isLoading: true }))
     try {
+      // Si Deezer está bloqueado, avisar y salir
+      if (musicSource === 'deezer' && window.localStorage.getItem('musicguess-deezer-blocked') === '1') {
+        alert('Deezer está temporalmente bloqueado por CORS o restricciones regionales. Por favor, selecciona otra fuente de música.');
+        setAvailableSongs([]);
+        setGameState(prev => ({ ...prev, isLoading: false }));
+        return;
+      }
       const queries = [
         'Aitana', 'Manuel Carrasco', 'Sebastian Yatra', 'Morat', 'Vanesa Martin',
         'indie español', 'indie spain', 'spanish indie', 'indie rock español', 'indie pop español',
