@@ -5,7 +5,6 @@ import { useGameState } from './hooks/useGameState'
 function App() {
   const [showLoading, setShowLoading] = useState(false);
   const {
-  const [showLoading, setShowLoading] = useState(false);
     gameState,
     stats,
     availableSongs,
