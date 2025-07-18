@@ -67,6 +67,8 @@ function App() {
 
   // Pantalla de inicio
   if (!gameState.gameStarted) {
+    // Detectar si no hay canciones válidas en la fuente seleccionada
+    const noSongsAvailable = !gameState.isLoading && availableSongs.length === 0
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center max-w-md w-full">
@@ -81,6 +83,13 @@ function App() {
               Podes adiviñar a canción en 10 segundos?
             </p>
           </div>
+          {/* Mensaje si no hay previews en la fuente seleccionada */}
+          {noSongsAvailable && (
+            <div className="mb-6 p-4 rounded-xl bg-red-100 text-red-700 text-sm">
+              No se encontraron previews de canciones en la fuente seleccionada (<b>{musicSource.charAt(0).toUpperCase() + musicSource.slice(1)}</b>).<br />
+              Prueba cambiando a otra fuente (Spotify, YouTube o Deezer) para más variedad de previews.
+            </div>
+          )}
 
           {/* Configuración del juego: selector de fuente de música */}
           <div className="glass-effect rounded-2xl p-6 mb-6">

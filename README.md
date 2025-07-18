@@ -5,11 +5,11 @@ Una aplicación web moderna y elegante para adivinar canciones. Los jugadores es
 
 ## ✨ Características
 
-- 🎧 **Audio real** - Usa previews de Spotify y YouTube para reproducir fragmentos de canciones reales directamente en la app
+ - 🎧 **Audio real** - Usa previews de Spotify, YouTube y Deezer para reproducir fragmentos de canciones reales directamente en la app
 - 📱 **Mobile-first** - Diseñado especialmente para dispositivos móviles
 - 🎨 **Interfaz elegante** - Diseño moderno con efectos glassmorphism y animaciones suaves
 - 📊 **Estadísticas** - Guarda tu progreso y estadísticas de juego
-- 🎯 **Múltiples dificultades** - Fácil (5 rondas), Medio (10 rondas), Difícil (15 rondas)
+ - 🎯 **Elige la fuente de música** - Puedes seleccionar entre Spotify, YouTube o Deezer como fuente de previews
 - 🎵 **Artistas populares** - Canciones de artistas internacionales y nacionales
 - 🏆 **Sistema de puntuación** - Guarda tu mejor puntuación y precisión
 
@@ -22,9 +22,9 @@ Una aplicación web moderna y elegante para adivinar canciones. Los jugadores es
 - npm o yarn
 
 
-### 1. Configurar APIs (Spotify y YouTube)
+### 1. Configurar APIs (Spotify, YouTube y Deezer)
 
-No necesitas claves de Last.fm. Para obtener previews de Spotify, puedes configurar las variables de entorno con tus credenciales de Spotify (opcional, solo si quieres más canciones y previews de 30s). Para YouTube, asegúrate de tener una clave de API si quieres más variedad.
+No necesitas claves de Last.fm. Para obtener previews de Spotify, puedes configurar las variables de entorno con tus credenciales de Spotify (opcional, solo si quieres más canciones y previews de 30s). Para YouTube, asegúrate de tener una clave de API si quieres más variedad. Deezer no requiere clave para previews, pero puede estar limitado por región.
 
 ### 2. Configurar el proyecto
 
@@ -53,6 +53,8 @@ No necesitas claves de Last.fm. Para obtener previews de Spotify, puedes configu
 
    # Opcional: YouTube API (para previews de YouTube)
    VITE_YOUTUBE_API_KEY=tu_youtube_api_key
+
+   # Deezer no requiere clave de API
    ```
 
 
@@ -69,26 +71,28 @@ La aplicación estará disponible en `http://localhost:3000`
 
 1. Configura tus variables de entorno en Netlify si usas Spotify o YouTube API.
 2. Despliega normalmente (`npm run build`).
-3. La app usará previews de Spotify y YouTube directamente en la interfaz.
+3. La app usará previews de Spotify, YouTube o Deezer directamente en la interfaz, según la fuente seleccionada.
 
 
 ## 🎮 Cómo Jugar
 
-1. **Configura el juego**: Elige la dificultad
-2. **Presiona "Empezar a jugar"**: La aplicación cargará canciones reales
+1. **Configura el juego**: Elige la fuente de música (Spotify, YouTube o Deezer)
+2. **Presiona "Empezar a jugar"**: La aplicación cargará canciones reales de la fuente seleccionada
 3. **Escucha**: Pulsa el botón de reproducir para escuchar el preview de la canción directamente en la app
 4. **Adivina**: Selecciona la respuesta correcta entre las 4 opciones
 5. **Continúa**: Completa todas las rondas y ve tu puntuación final
 
 
-## 🎵 Nota sobre el Audio
+## 🎵 Nota sobre el Audio y las Fuentes
 
-La aplicación reproduce previews de canciones reales directamente en la interfaz, usando Spotify y YouTube como fuentes de audio. No se abre YouTube ni otras ventanas externas.
+La aplicación reproduce previews de canciones reales directamente en la interfaz, usando Spotify, YouTube o Deezer como fuentes de audio. No se abre YouTube ni otras ventanas externas.
+
+**Importante:** La disponibilidad de previews depende de la fuente seleccionada y de la canción. Si no se encuentran previews en una fuente, prueba con otra (por ejemplo, Deezer suele tener más previews para música española y latina).
 
 
 ## 🎵 Artistas Incluidos
 
-La aplicación incluye canciones de artistas populares internacionales y nacionales (según disponibilidad de previews en Spotify/YouTube).
+La aplicación incluye canciones de artistas populares internacionales y nacionales (según disponibilidad de previews en Spotify, YouTube o Deezer).
 
 ## 📁 Estructura del Proyecto
 
@@ -96,7 +100,7 @@ La aplicación incluye canciones de artistas populares internacionales y naciona
 src/
 ├── components/          # Componentes React reutilizables
 ├── hooks/              # Custom hooks (useGameState)
-├── services/           # Servicios para APIs (Spotify)
+├── services/           # Servicios para APIs (Spotify, YouTube, Deezer)
 ├── types/              # Definiciones de tipos TypeScript
 ├── App.tsx             # Componente principal
 ├── main.tsx            # Punto de entrada
@@ -111,7 +115,7 @@ src/
 - **Vite** - Build tool y dev server
 - **Tailwind CSS** - Framework de estilos
 - **Lucide React** - Iconos SVG
-- **Spotify API** y **YouTube API** - Previews de audio
+- **Spotify API**, **YouTube API** y **Deezer API** - Previews de audio
 - **Local Storage** - Persistencia de estadísticas
 
 ## 📈 Características Técnicas
@@ -128,7 +132,7 @@ src/
 
 
 ### Integración con APIs de música
-- Spotify y YouTube para obtener previews de audio
+- Spotify, YouTube y Deezer para obtener previews de audio
 - Fallback inteligente si alguna búsqueda falla
 - Cache de 24 horas para optimizar rendimiento
 
@@ -166,7 +170,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## 🎵 Créditos
 
-- Previews musicales por [Spotify API](https://developer.spotify.com/) y [YouTube API](https://developers.google.com/youtube)
+- Previews musicales por [Spotify API](https://developer.spotify.com/), [YouTube API](https://developers.google.com/youtube) y [Deezer API](https://developers.deezer.com/)
 - Iconos por [Lucide](https://lucide.dev/)
 - Inspiración de diseño: Spotify, Apple Music, y otras apps musicales modernas
 
