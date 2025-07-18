@@ -28,7 +28,7 @@ export const StatsCard = ({ stats }: StatsCardProps) => {
             <Trophy className="w-5 h-5 text-yellow-500" />
           </div>
           <div className="text-2xl font-bold text-spotify-green">{stats.bestScore}</div>
-          <div className="text-sm text-gray-300">Mejor puntuación</div>
+          <div className="text-sm text-gray-300">Mellor puntuación</div>
         </div>
 
         <div className="text-center p-4 bg-white/5 rounded-xl">
@@ -36,7 +36,7 @@ export const StatsCard = ({ stats }: StatsCardProps) => {
             <Calendar className="w-5 h-5 text-blue-400" />
           </div>
           <div className="text-2xl font-bold text-spotify-green">{stats.totalGames}</div>
-          <div className="text-sm text-gray-300">Partidas jugadas</div>
+          <div className="text-sm text-gray-300">Partidas xogadas</div>
         </div>
 
         <div className="text-center p-4 bg-white/5 rounded-xl">
@@ -44,7 +44,7 @@ export const StatsCard = ({ stats }: StatsCardProps) => {
             <TrendingUp className="w-5 h-5 text-green-400" />
           </div>
           <div className="text-2xl font-bold text-spotify-green">{stats.averageScore}</div>
-          <div className="text-sm text-gray-300">Promedio</div>
+          <div className="text-sm text-gray-300">Media</div>
         </div>
 
         <div className="text-center p-4 bg-white/5 rounded-xl">
@@ -61,7 +61,7 @@ export const StatsCard = ({ stats }: StatsCardProps) => {
           <div className="text-center">
             <div className="text-sm text-gray-300 mb-1">Progreso total</div>
             <div className="text-lg font-semibold">
-              {stats.correctAnswers} de {stats.totalAnswers} canciones adivinadas
+              {stats.correctAnswers} de {stats.totalAnswers} cancións adiviñadas
             </div>
             <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
               <div 

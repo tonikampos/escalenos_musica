@@ -48,10 +48,10 @@ export const useGameState = () => {
   const loadSongs = useCallback(async () => {
     setGameState(prev => ({ ...prev, isLoading: true }))
     
-    console.log('🎵 CARGANDO CANCIONES DE ARTISTAS ESPECÍFICOS')
-    console.log('🎯 Buscando canciones de artistas seleccionados...')
-    
-    try {
+      console.log('🎵 CARGANDO CANCIÓNS DE ARTISTAS ESPECÍFICOS')
+      console.log('🎯 Buscando cancións de artistas seleccionados...')
+      
+      try {
       // Verificar caché primero
       const cachedSongs = localStorage.getItem('musicguess-songs-cache')
       const cacheTimestamp = localStorage.getItem('musicguess-cache-timestamp')
@@ -60,7 +60,7 @@ export const useGameState = () => {
       if (cachedSongs && cacheTimestamp) {
         const cacheAge = Date.now() - parseInt(cacheTimestamp)
         if (cacheAge < oneDayInMs) {
-          console.log('✅ Usando canciones del caché (válidas por 24h)')
+          console.log('✅ Usando cancións do caché (válidas por 24h)')
           const songs = JSON.parse(cachedSongs)
           setAvailableSongs(songs)
           setGameState(prev => ({ ...prev, isLoading: false }))
@@ -103,11 +103,11 @@ export const useGameState = () => {
       // Buscar canciones de cada artista específico
       for (const artist of artistasEspecificos) {
         try {
-          console.log(`🎤 Buscando las mejores canciones de: ${artist}`)
+          console.log(`🎤 Buscando as mellores cancións de: ${artist}`)
           const artistTracks = await youtubeMusicService.searchByArtist(artist, 3) // Reducido a 3 canciones por artista
           tracks = [...tracks, ...artistTracks]
           
-          console.log(`✅ Encontradas ${artistTracks.length} canciones de ${artist}`)
+          console.log(`✅ Encontradas ${artistTracks.length} cancións de ${artist}`)
           
           // Pequeña pausa para evitar rate limiting
           await new Promise(resolve => setTimeout(resolve, 300))
@@ -118,10 +118,10 @@ export const useGameState = () => {
           // Intentar búsqueda alternativa si falla
           try {
             console.log(`🔄 Intentando búsqueda alternativa para ${artist}`)
-            const alternativeTracks = await youtubeMusicService.searchTracks(`${artist} mejor canción`, 5)
+            const alternativeTracks = await youtubeMusicService.searchTracks(`${artist} mellor canción`, 5)
             tracks = [...tracks, ...alternativeTracks]
           } catch (altError) {
-            console.log(`❌ También falló la búsqueda alternativa para ${artist}`)
+            console.log(`❌ También falló a búsqueda alternativa para ${artist}`)
           }
         }
       }
@@ -129,7 +129,7 @@ export const useGameState = () => {
       console.log('📊 Total de tracks encontrados:', tracks.length)
       
       if (tracks.length === 0) {
-        throw new Error('No se encontraron canciones de los artistas especificados')
+        throw new Error('Non se encontraron cancións dos artistas especificados')
       }
 
       // Convertir a nuestro formato
@@ -143,14 +143,14 @@ export const useGameState = () => {
         )
       )
       
-      console.log(`✅ Canciones únicas encontradas: ${uniqueSongs.length}`)
-      console.log('📋 Muestra de canciones encontradas:')
+      console.log(`✅ Cancións únicas encontradas: ${uniqueSongs.length}`)
+      console.log('📋 Mostra de cancións encontradas:')
       uniqueSongs.slice(0, 10).forEach((song, i) => {
         console.log(`${i + 1}. ${song.title} - ${song.artist}`)
       })
 
       if (uniqueSongs.length < 4) {
-        throw new Error(`Solo ${uniqueSongs.length} canciones encontradas, necesitamos al menos 4`)
+        throw new Error(`Solo ${uniqueSongs.length} cancións encontradas, necesitamos polo menos 4`)
       }
 
       // Mezclar las canciones - tomar todas las encontradas (sin límite específico)
@@ -161,23 +161,23 @@ export const useGameState = () => {
       localStorage.setItem('musicguess-cache-timestamp', Date.now().toString())
       
       setAvailableSongs(shuffledSongs)
-      console.log(`✅ ÉXITO: ${shuffledSongs.length} canciones de tus artistas favoritos cargadas y guardadas en caché`)
+      console.log(`✅ ÉXITO: ${shuffledSongs.length} cancións dos teus artistas favoritos cargadas e gardadas no caché`)
       
       // Mostrar estadísticas por artista
       const artistStats = artistasEspecificos.map(artist => {
         const count = shuffledSongs.filter(song => 
           song.artist.toLowerCase().includes(artist.toLowerCase())
         ).length
-        return `${artist}: ${count} canciones`
+        return `${artist}: ${count} cancións`
       })
-      console.log('📊 Canciones por artista:')
+      console.log('📊 Cancións por artista:')
       artistStats.forEach(stat => console.log(`   ${stat}`))
       
     } catch (error) {
-      console.error('❌ Error cargando canciones de artistas específicos:', error)
+      console.error('❌ Error cargando cancións de artistas específicos:', error)
       
       // Fallback: Usar canciones conocidas de algunos de estos artistas
-      console.log('🔄 Usando fallback con canciones conocidas de tus artistas...')
+      console.log('🔄 Usando fallback con cancións coñecidas dos teus artistas...')
       
       const fallbackSongs: Song[] = [
         {
@@ -238,7 +238,7 @@ export const useGameState = () => {
         }
       ]
       
-      console.log('📝 Usando canciones conocidas de tus artistas:', fallbackSongs.length)
+      console.log('📝 Usando cancións coñecidas dos teus artistas:', fallbackSongs.length)
       setAvailableSongs(fallbackSongs)
     }
     
@@ -312,7 +312,7 @@ export const useGameState = () => {
       showAnswer: false,
       score: newScore,
       round: prev.round + 1,
-      isPlaying: true // ✅ Reproducir automáticamente la siguiente canción
+      isPlaying: true // ✅ Reproducir automáticamente a seguinte canción
     }))
   }, [gameState, availableSongs])
 

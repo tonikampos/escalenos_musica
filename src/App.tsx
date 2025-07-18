@@ -74,7 +74,7 @@ function App() {
               MusicGuess
             </h1>
             <p className="text-gray-300 text-lg">
-              ¿Puedes adivinar la canción en 10 segundos?
+              Podes adiviñar a canción en 10 segundos?
             </p>
           </div>
 
@@ -87,7 +87,7 @@ function App() {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Dificultad</label>
+                <label className="block text-sm font-medium mb-2">Dificultade</label>
                 <div className="grid grid-cols-3 gap-2">
                   {(['easy', 'medium', 'hard'] as const).map((diff) => (
                     <button
@@ -109,19 +109,19 @@ function App() {
 
           {/* Cómo jugar */}
           <div className="glass-effect rounded-2xl p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">Cómo jugar</h2>
+            <h2 className="text-xl font-semibold mb-4">Como xogar</h2>
             <div className="space-y-3 text-sm text-gray-300">
               <div className="flex items-center">
                 <Volume2 className="w-4 h-4 mr-3 text-spotify-green" />
-                <span>Escucha 10 segundos de la canción</span>
+                <span>Escoita 10 segundos da canción</span>
               </div>
               <div className="flex items-center">
                 <Star className="w-4 h-4 mr-3 text-spotify-green" />
-                <span>Elige la respuesta correcta</span>
+                <span>Escolle a resposta correcta</span>
               </div>
               <div className="flex items-center">
                 <RotateCcw className="w-4 h-4 mr-3 text-spotify-green" />
-                <span>Completa todas las rondas y obtén tu puntuación</span>
+                <span>Completa todas as roldas e obtén a túa puntuación</span>
               </div>
             </div>
           </div>
@@ -136,15 +136,15 @@ function App() {
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
                   <div className="text-2xl font-bold text-spotify-green">{stats.bestScore}</div>
-                  <div className="text-sm text-gray-300">Mejor puntuación</div>
+                  <div className="text-sm text-gray-300">Mellor puntuación</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-spotify-green">{stats.totalGames}</div>
-                  <div className="text-sm text-gray-300">Partidas jugadas</div>
+                  <div className="text-sm text-gray-300">Partidas xogadas</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-spotify-green">{stats.averageScore}</div>
-                  <div className="text-sm text-gray-300">Promedio</div>
+                  <div className="text-sm text-gray-300">Media</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-spotify-green">
@@ -161,7 +161,7 @@ function App() {
             disabled={gameState.isLoading}
             className="button-primary w-full text-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {gameState.isLoading ? 'Cargando canciones...' : 'Empezar a jugar'}
+            {gameState.isLoading ? 'Cargando cancións...' : 'Comezar a xogar'}
           </button>
           
           {/* Debug info */}
@@ -196,7 +196,7 @@ function App() {
             <RotateCcw className="w-4 h-4" />
           </button>
           <div className="text-sm">
-            <span className="text-gray-300">Ronda </span>
+            <span className="text-gray-300">Rolda </span>
             <span className="font-bold text-spotify-green">{gameState.round}</span>
             <span className="text-gray-300"> de {gameState.maxRounds}</span>
           </div>
@@ -265,7 +265,7 @@ function App() {
 
         {gameState.isPlaying && (
           <div className="text-sm text-gray-300">
-            Reproduciendo... 10 segundos
+            Reproducindo... 10 segundos
           </div>
         )}
       </div>
@@ -273,7 +273,7 @@ function App() {
       {/* Opciones de respuesta */}
       <div className="space-y-3">
         <h3 className="text-lg font-semibold text-center mb-4">
-          ¿Cuál es esta canción?
+          Cal é esta canción?
         </h3>
         
         {gameState.options.map((song) => {
@@ -322,7 +322,7 @@ function App() {
             onClick={nextRound}
             className="button-primary"
           >
-            {gameState.round >= gameState.maxRounds ? 'Ver Resultados' : 'Siguiente Ronda'}
+            {gameState.round >= gameState.maxRounds ? 'Ver Resultados' : 'Seguinte Rolda'}
           </button>
         </div>
       )}
