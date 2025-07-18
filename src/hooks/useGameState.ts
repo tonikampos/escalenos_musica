@@ -43,91 +43,74 @@ export const useGameState = () => {
   // Cargar canciones desde YouTube y Spotify
   const loadSongs = useCallback(async (category: string = 'pop') => {
     setGameState(prev => ({ ...prev, isLoading: true }))
-    let songs: Song[] = []
     try {
-      // Queries para indie español y grupos gallegos
       const queries = [
-        'Aitana',
-        'Manuel Carrasco',
-        'Sebastian Yatra',
-        'Morat',
-        'Vanesa Martin',
-        'indie español',
-        'indie spain',
-        'spanish indie',
-        'indie rock español',
-        'indie pop español',
-        'música independiente española',
-        'grupos gallegos',
-        'música gallega',
-        'banda gallega',
-        'grupo gallego',
-        'pop gallego',
-        'rock gallego',
-        'indie gallego',
-        'folk gallego',
-        'Arde Bogota',
-        'Viva Suecia',
-        'Siloe',
-        'Sidonie',
-        'Shinova',
-        'Marlena',
-        'Heredeiros da Crus',
-        'Dakidarria',
-        'Miss Caffeina',
-        'Funambulista',
-        'Lori Meyers',
-        'La La Love You',
-        'Sexy Zebras',
-        'Mikel Izal',
-        'Fillas de Casandra',
-        'Lontreira',
-        'QUEVEDO',
-        'Myke Towers',
-        'Beéle',
-        'Lucho RK',
-        'Kapo',
-        'Blackpink',
-        'Lola Indigo',
-        'Bad Bunny',
-        'Manuel Turizo',
-        'Karol G'
+        'Aitana', 'Manuel Carrasco', 'Sebastian Yatra', 'Morat', 'Vanesa Martin',
+        'indie español', 'indie spain', 'spanish indie', 'indie rock español', 'indie pop español',
+        'música independiente española', 'grupos gallegos', 'música gallega', 'banda gallega', 'grupo gallego',
+        'pop gallego', 'rock gallego', 'indie gallego', 'folk gallego',
+        'Arde Bogota', 'Viva Suecia', 'Siloe', 'Sidonie', 'Shinova', 'Marlena', 'Heredeiros da Crus', 'Dakidarria',
+        'Miss Caffeina', 'Funambulista', 'Lori Meyers', 'La La Love You', 'Sexy Zebras', 'Mikel Izal',
+        'Fillas de Casandra', 'Lontreira', 'QUEVEDO', 'Myke Towers', 'Beéle', 'Lucho RK', 'Kapo',
+        'Blackpink', 'Lola Indigo', 'Bad Bunny', 'Manuel Turizo', 'Karol G'
       ];
       let allSongs: Song[] = [];
       for (const q of queries) {
         let found: Song[] = [];
-        if (musicSource === 'spotify') {
-          const spotifyTracks = await spotifyService.getRandomTracks(q, 10);
-          found = spotifyTracks
-            .filter(track => !!track.preview_url)
-            .map(track => ({
-              id: track.id,
-              title: track.name,
-              artist: track.artists[0]?.name || '',
-              previewUrl: track.preview_url || '',
-              albumCover: track.album.images[0]?.url || ''
-            }));
-        } else if (musicSource === 'youtube') {
-          const youtubeTracks = await youtubeMusicService.searchByCategory(q, 10);
-          found = youtubeTracks.map(track => ({
-            id: track.id,
-            title: track.title,
-            artist: track.artist,
-            previewUrl: track.audioUrl || '',
-            albumCover: track.thumbnailUrl || ''
-          }));
-        } else if (musicSource === 'deezer') {
-          found = await deezerService.searchTracks(q, 10);
+        try {
+          if (musicSource === 'spotify') {
+            const spotifyTracks = await spotifyService.getRandomTracks(q, 10);
+            if (Array.isArray(spotifyTracks)) {
+              found = spotifyTracks
+                .filter(track => !!track && !!track.preview_url)
+                .map(track => ({
+                  id: track.id,
+                  title: track.name,
+                  artist: track.artists?.[0]?.name || '',
+                  previewUrl: track.preview_url || '',
+                  albumCover: track.album?.images?.[0]?.url || ''
+                }));
+            }
+          } else if (musicSource === 'youtube') {
+            const youtubeTracks = await youtubeMusicService.searchByCategory(q, 10);
+            if (Array.isArray(youtubeTracks)) {
+              found = youtubeTracks
+                .filter(track => !!track && !!track.audioUrl)
+                .map(track => ({
+                  id: track.id,
+                  title: track.title,
+                  artist: track.artist,
+                  previewUrl: track.audioUrl || '',
+                  albumCover: track.thumbnailUrl || ''
+                }));
+            }
+          } else if (musicSource === 'deezer') {
+            try {
+              const deezerTracks = await deezerService.searchTracks(q, 10);
+              if (Array.isArray(deezerTracks)) {
+                found = deezerTracks.filter(track => !!track && !!track.previewUrl);
+              }
+            } catch (deezerError) {
+              console.warn('Deezer error for query', q, deezerError);
+            }
+          }
+        } catch (queryError) {
+          console.warn('Error en búsqueda para', q, queryError);
         }
-        allSongs = allSongs.concat(found);
+        if (Array.isArray(found) && found.length > 0) {
+          allSongs = allSongs.concat(found);
+        }
       }
       // Filtrar duplicados y previews vacíos
-      allSongs = allSongs.filter(song => song.previewUrl);
+      allSongs = allSongs.filter(song => song && song.previewUrl);
       allSongs = allSongs.filter((song, idx, arr) =>
         arr.findIndex(s => s.title.toLowerCase() === song.title.toLowerCase() && s.artist.toLowerCase() === song.artist.toLowerCase()) === idx
       );
       if (allSongs.length < 4) {
-        throw new Error('Non se encontraron cancións suficientes en la fuente seleccionada');
+        setAvailableSongs([]);
+        setGameState(prev => ({ ...prev, isLoading: false }));
+        alert('No se encontraron canciones válidas con preview en la fuente seleccionada. Prueba con otra fuente o inténtalo más tarde.');
+        return;
       }
       const shuffledSongs = allSongs.sort(() => Math.random() - 0.5);
       setAvailableSongs(shuffledSongs);
@@ -135,9 +118,9 @@ export const useGameState = () => {
       localStorage.setItem('musicguess-cache-timestamp', Date.now().toString());
       console.log(`✅ ${shuffledSongs.length} cancións cargadas de ${musicSource}`);
     } catch (error) {
-      // No fallback, solo error
       console.error('❌ Error cargando cancións:', error);
       setAvailableSongs([]);
+      alert('Error cargando canciones. Puede que la fuente esté bloqueada o no haya previews disponibles.');
     }
     setGameState(prev => ({ ...prev, isLoading: false }));
   }, [musicSource])
