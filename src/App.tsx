@@ -11,33 +11,60 @@ function App() {
     nextRound,
     selectAnswer,
     resetGame,
-    togglePlayback,
-    updateSettings
+    togglePlay,
+    loadSongs
   } = useGameState()
 
   const audioRef = useRef<HTMLAudioElement>(null)
 
+  // Funciones para manejar configuraciones
+  const updateDifficulty = (difficulty: 'easy' | 'medium' | 'hard') => {
+    // En una implementación real, esto actualizaría el estado
+    console.log('Cambiando dificultad a:', difficulty)
+  }
+
+  const updateCategory = (category: string) => {
+    // En una implementación real, esto actualizaría el estado
+    console.log('Cambiando categoría a:', category)
+  }
+
+  // Determinar si la URL es de YouTube
+  const isYouTubeUrl = (url: string) => {
+    return url.includes('youtube.com/embed/')
+  }
+
   // Manejar reproducción de audio
   useEffect(() => {
-    if (audioRef.current && gameState.currentSong) {
-      if (gameState.isPlaying) {
-        audioRef.current.src = gameState.currentSong.previewUrl
-        audioRef.current.play().catch(console.error)
-        
-        // Pausar después de 10 segundos
-        const timer = setTimeout(() => {
-          if (audioRef.current) {
-            audioRef.current.pause()
-            togglePlayback()
-          }
-        }, 10000)
-
-        return () => clearTimeout(timer)
+    if (gameState.currentSong && gameState.isPlaying) {
+      const previewUrl = gameState.currentSong.previewUrl
+      
+      if (isYouTubeUrl(previewUrl)) {
+        // Para YouTube, simplemente mostrar el iframe
+        console.log('🎵 Reproduciendo desde YouTube:', previewUrl)
       } else {
+        // Para otros audios, usar el elemento audio
+        if (audioRef.current) {
+          audioRef.current.src = previewUrl
+          audioRef.current.play().catch(console.error)
+        }
+      }
+      
+      // Pausar después de 10 segundos
+      const timer = setTimeout(() => {
+        if (audioRef.current && !isYouTubeUrl(previewUrl)) {
+          audioRef.current.pause()
+        }
+        togglePlay()
+      }, 10000)
+
+      return () => clearTimeout(timer)
+    } else {
+      // Pausar audio si no está reproduciéndose
+      if (audioRef.current) {
         audioRef.current.pause()
       }
     }
-  }, [gameState.isPlaying, gameState.currentSong, togglePlayback])
+  }, [gameState.isPlaying, gameState.currentSong, togglePlay])
 
   // Pantalla de inicio
   if (!gameState.gameStarted) {
@@ -70,7 +97,7 @@ function App() {
                   {(['easy', 'medium', 'hard'] as const).map((diff) => (
                     <button
                       key={diff}
-                      onClick={() => updateSettings(diff, gameState.category)}
+                      onClick={() => updateDifficulty(diff)}
                       className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${
                         gameState.difficulty === diff
                           ? 'bg-spotify-green text-white'
@@ -87,7 +114,7 @@ function App() {
                 <label className="block text-sm font-medium mb-2">Categoría</label>
                 <select
                   value={gameState.category}
-                  onChange={(e) => updateSettings(gameState.difficulty, e.target.value)}
+                  onChange={(e) => updateCategory(e.target.value)}
                   className="w-full bg-white/10 border border-white/20 rounded-lg py-2 px-3 text-white"
                 >
                   <option value="pop">Pop</option>
@@ -182,7 +209,6 @@ function App() {
   // Pantalla de juego
   return (
     <div className="min-h-screen p-4">
-      <audio ref={audioRef} />
       
       {/* Header con puntuación */}
       <div className="flex justify-between items-center mb-6">
@@ -229,7 +255,7 @@ function App() {
           )}
           
           <button 
-            onClick={togglePlayback}
+            onClick={togglePlay}
             className="button-primary"
           >
             {gameState.isPlaying ? (
@@ -240,6 +266,23 @@ function App() {
             {gameState.isPlaying ? 'Pausar' : 'Reproducir'}
           </button>
         </div>
+
+        {/* Reproductor de YouTube embebido */}
+        {gameState.isPlaying && gameState.currentSong && isYouTubeUrl(gameState.currentSong.previewUrl) && (
+          <div className="mb-6">
+            <iframe
+              src={gameState.currentSong.previewUrl}
+              width="100%"
+              height="200"
+              className="rounded-xl"
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+            />
+          </div>
+        )}
+
+        {/* Reproductor de audio tradicional */}
+        <audio ref={audioRef} />
 
         {gameState.isPlaying && (
           <div className="text-sm text-gray-300">
@@ -256,13 +299,13 @@ function App() {
         
         {gameState.options.map((song) => {
           const isCorrect = song.id === gameState.currentSong?.id
-          const isSelected = gameState.selectedAnswer?.id === song.id
+          const isSelected = gameState.selectedAnswer === song.id
           const showResult = gameState.showAnswer
           
           return (
             <button
               key={song.id}
-              onClick={() => selectAnswer(song)}
+              onClick={() => selectAnswer(song.id)}
               disabled={gameState.showAnswer}
               className={`w-full p-4 rounded-xl text-left transition-all duration-200 ${
                 showResult && isCorrect 

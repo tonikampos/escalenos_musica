@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Song, GameState, GameStats } from '../types/xogo'
-import { spotifyService } from '../services/spotifyService'
+import { youtubeMusicService } from '../services/youtubeMusicService'
 
 // Estado inicial del juego
 const INITIAL_STATE: GameState = {
@@ -35,186 +35,171 @@ export const useGameState = () => {
     return saved ? JSON.parse(saved) : INITIAL_STATS
   })
 
-  // Función para convertir SpotifyTrack a Song
-  const convertSpotifyTrack = (track: any): Song => ({
+  // Función para convertir YouTubeTrack a Song
+  const convertYouTubeTrack = (track: any): Song => ({
     id: track.id,
-    title: track.name,
-    artist: track.artists?.[0]?.name || 'Unknown Artist',
-    previewUrl: track.preview_url || '',
-    albumCover: track.album?.images?.[0]?.url || ''
+    title: track.title,
+    artist: track.artist,
+    previewUrl: youtubeMusicService.getEmbedAudioUrl(track.id),
+    albumCover: track.thumbnailUrl
   })
 
-  // Cargar canciones REALES de Spotify
+  // Cargar canciones REALES de YouTube Music
   const loadSongs = useCallback(async (category: string = 'pop') => {
     setGameState(prev => ({ ...prev, isLoading: true }))
     
-    console.log('🎵 CARGANDO CANCIONES REALES DE SPOTIFY')
+    console.log('🎵 CARGANDO CANCIONES DE YOUTUBE MUSIC')
     console.log('🎯 Categoría seleccionada:', category)
     
     try {
-      // Estrategia 1: Usar búsquedas dirigidas por artistas populares
-      const popularArtistsByCategory = {
-        'pop': [
-          'Taylor Swift', 'Ed Sheeran', 'Ariana Grande', 'Harry Styles', 'Dua Lipa',
-          'Billie Eilish', 'The Weeknd', 'Olivia Rodrigo', 'Adele', 'Bruno Mars'
-        ],
-        'hits': [
-          'Drake', 'Post Malone', 'The Weeknd', 'Dua Lipa', 'Billie Eilish',
-          'Justin Bieber', 'Ariana Grande', 'Taylor Swift', 'Ed Sheeran'
-        ],
-        'indie': [
-          'Arctic Monkeys', 'The Strokes', 'Tame Impala', 'Foster the People',
-          'Vampire Weekend', 'The 1975', 'Glass Animals', 'Alt-J'
-        ],
-        'rock': [
-          'Imagine Dragons', 'OneRepublic', 'Coldplay', 'Maroon 5',
-          'The Killers', 'Red Hot Chili Peppers', 'Foo Fighters'
-        ],
-        'latin': [
-          'Bad Bunny', 'Rosalía', 'Karol G', 'Ozuna', 'J Balvin',
-          'Daddy Yankee', 'Maluma', 'Anuel AA', 'Rauw Alejandro'
-        ],
-        'electronic': [
-          'Calvin Harris', 'David Guetta', 'Tiësto', 'Avicii', 'Marshmello',
-          'Martin Garrix', 'Skrillex', 'Deadmau5', 'The Chainsmokers'
-        ]
+      // Verificar si tenemos API key de YouTube
+      if (!youtubeMusicService.hasApiKey()) {
+        console.log('⚠️ No hay API key de YouTube, usando fallback')
+        throw new Error('No YouTube API key configured')
       }
 
-      const artists = popularArtistsByCategory[category as keyof typeof popularArtistsByCategory] || popularArtistsByCategory.pop
+      // Estrategia 1: Buscar por categoría
+      console.log('🔍 Buscando por categoría:', category)
+      let tracks = await youtubeMusicService.searchByCategory(category, 30)
+      
+      if (tracks.length < 10) {
+        console.log('🔄 Pocos resultados, buscando por artistas populares...')
+        
+        // Estrategia 2: Buscar por artistas populares
+        const popularArtistsByCategory = {
+          'pop': ['Taylor Swift', 'Ed Sheeran', 'Ariana Grande', 'Harry Styles', 'Dua Lipa'],
+          'hits': ['Drake', 'The Weeknd', 'Billie Eilish', 'Justin Bieber', 'Post Malone'],
+          'indie': ['Arctic Monkeys', 'The Strokes', 'Tame Impala', 'Glass Animals'],
+          'rock': ['Imagine Dragons', 'Coldplay', 'Maroon 5', 'OneRepublic'],
+          'latin': ['Bad Bunny', 'Rosalía', 'J Balvin', 'Karol G'],
+          'electronic': ['Calvin Harris', 'David Guetta', 'Marshmello', 'The Chainsmokers']
+        }
 
-      let allTracks: any[] = []
-
-      // Buscar canciones por cada artista
-      for (const artist of artists) {
-        try {
-          console.log(`🔍 Buscando canciones de: ${artist}`)
-          const tracks = await spotifyService.getRandomTracks(artist, 10)
-          
-          if (tracks.length > 0) {
-            allTracks = [...allTracks, ...tracks]
-            console.log(`✅ Agregadas ${tracks.length} canciones de ${artist}`)
-          } else {
-            console.log(`⚠️ No se encontraron canciones de ${artist}`)
+        const artists = popularArtistsByCategory[category as keyof typeof popularArtistsByCategory] || popularArtistsByCategory.pop
+        
+        for (const artist of artists) {
+          try {
+            console.log(`🎤 Buscando canciones de: ${artist}`)
+            const artistTracks = await youtubeMusicService.searchByArtist(artist, 5)
+            tracks = [...tracks, ...artistTracks]
+            
+            if (tracks.length >= 25) break
+          } catch (error) {
+            console.log(`❌ Error buscando ${artist}:`, error)
           }
-          
-          // Evitar demasiadas solicitudes
-          if (allTracks.length >= 100) break
-          
-        } catch (error) {
-          console.log(`❌ Error buscando ${artist}:`, error)
         }
       }
 
-      console.log('📊 Total de tracks obtenidos:', allTracks.length)
+      console.log('📊 Total de tracks de YouTube:', tracks.length)
       
-      if (allTracks.length === 0) {
-        throw new Error('No se pudieron obtener canciones de ningún artista')
+      if (tracks.length === 0) {
+        throw new Error('No se encontraron canciones en YouTube Music')
       }
 
-      // Convertir tracks a formato Song
-      const songs = allTracks.map(convertSpotifyTrack)
+      // Convertir a nuestro formato
+      const songs = tracks.map(convertYouTubeTrack)
       
-      // Filtrar solo canciones que tienen preview
-      const songsWithPreview = songs.filter(song => song.previewUrl)
-      console.log(`🎵 Canciones con preview: ${songsWithPreview.length}/${songs.length}`)
+      // Filtrar duplicados por título
+      const uniqueSongs = songs.filter((song, index, self) => 
+        index === self.findIndex(s => s.title.toLowerCase() === song.title.toLowerCase())
+      )
       
-      // Mostrar muestra de las canciones obtenidas
-      console.log('📋 Muestra de canciones obtenidas:')
-      songsWithPreview.slice(0, 5).forEach((song, i) => {
+      console.log(`✅ Canciones únicas de YouTube: ${uniqueSongs.length}`)
+      console.log('📋 Muestra de canciones:')
+      uniqueSongs.slice(0, 5).forEach((song, i) => {
         console.log(`${i + 1}. ${song.title} - ${song.artist}`)
-        console.log(`   Preview: ${song.previewUrl ? '✅' : '❌'}`)
       })
 
-      if (songsWithPreview.length < 4) {
-        throw new Error(`Solo ${songsWithPreview.length} canciones tienen preview, necesitamos al menos 4`)
+      if (uniqueSongs.length < 4) {
+        throw new Error(`Solo ${uniqueSongs.length} canciones encontradas, necesitamos al menos 4`)
       }
 
-      // Mezclar las canciones para mayor variedad
-      const shuffledSongs = songsWithPreview.sort(() => Math.random() - 0.5)
+      // Mezclar las canciones
+      const shuffledSongs = uniqueSongs.sort(() => Math.random() - 0.5).slice(0, 50)
       
       setAvailableSongs(shuffledSongs)
-      console.log(`✅ ÉXITO: ${shuffledSongs.length} canciones reales de Spotify cargadas`)
+      console.log(`✅ ÉXITO: ${shuffledSongs.length} canciones reales de YouTube Music cargadas`)
       
     } catch (error) {
-      console.error('❌ Error cargando canciones de Spotify:', error)
+      console.error('❌ Error cargando de YouTube Music:', error)
       
-      // Fallback: Usar canciones populares con URLs de audio que SÍ funcionan
-      console.log('🔄 Usando fallback con canciones populares y audio real...')
+      // Fallback: Usar canciones populares con información real
+      console.log('🔄 Usando fallback con canciones populares conocidas...')
       
       const fallbackSongs: Song[] = [
         {
-          id: 'fallback1',
-          title: 'Blinding Lights',
-          artist: 'The Weeknd',
-          previewUrl: 'https://file-examples.com/storage/fe86e7b6b54c9b3dce6a4c4/2017/11/file_example_MP3_700KB.mp3',
-          albumCover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop'
+          id: 'dQw4w9WgXcQ',
+          title: 'Never Gonna Give You Up',
+          artist: 'Rick Astley',
+          previewUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&start=30&end=60&controls=0',
+          albumCover: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg'
         },
         {
-          id: 'fallback2',
+          id: 'kJQP7kiw5Fk',
+          title: 'Despacito',
+          artist: 'Luis Fonsi ft. Daddy Yankee',
+          previewUrl: 'https://www.youtube.com/embed/kJQP7kiw5Fk?autoplay=1&start=30&end=60&controls=0',
+          albumCover: 'https://img.youtube.com/vi/kJQP7kiw5Fk/maxresdefault.jpg'
+        },
+        {
+          id: '9bZkp7q19f0',
+          title: 'Gangnam Style',
+          artist: 'PSY',
+          previewUrl: 'https://www.youtube.com/embed/9bZkp7q19f0?autoplay=1&start=30&end=60&controls=0',
+          albumCover: 'https://img.youtube.com/vi/9bZkp7q19f0/maxresdefault.jpg'
+        },
+        {
+          id: 'fJ9rUzIMcZQ',
+          title: 'Bohemian Rhapsody',
+          artist: 'Queen',
+          previewUrl: 'https://www.youtube.com/embed/fJ9rUzIMcZQ?autoplay=1&start=30&end=60&controls=0',
+          albumCover: 'https://img.youtube.com/vi/fJ9rUzIMcZQ/maxresdefault.jpg'
+        },
+        {
+          id: '60ItHLz5WEA',
           title: 'Shape of You',
           artist: 'Ed Sheeran',
-          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3',
-          albumCover: 'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=300&h=300&fit=crop'
+          previewUrl: 'https://www.youtube.com/embed/60ItHLz5WEA?autoplay=1&start=30&end=60&controls=0',
+          albumCover: 'https://img.youtube.com/vi/60ItHLz5WEA/maxresdefault.jpg'
         },
         {
-          id: 'fallback3',
-          title: 'Bad Guy',
-          artist: 'Billie Eilish',
-          previewUrl: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
-          albumCover: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'
+          id: 'JGwWNGJdvx8',
+          title: 'Shape of You',
+          artist: 'Ed Sheeran',
+          previewUrl: 'https://www.youtube.com/embed/JGwWNGJdvx8?autoplay=1&start=30&end=60&controls=0',
+          albumCover: 'https://img.youtube.com/vi/JGwWNGJdvx8/maxresdefault.jpg'
         },
         {
-          id: 'fallback4',
-          title: 'Watermelon Sugar',
-          artist: 'Harry Styles',
-          previewUrl: 'https://file-examples.com/storage/fe86e7b6b54c9b3dce6a4c4/2017/11/file_example_MP3_1MG.mp3',
-          albumCover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop'
+          id: 'hTWKbfoikeg',
+          title: 'Smells Like Teen Spirit',
+          artist: 'Nirvana',
+          previewUrl: 'https://www.youtube.com/embed/hTWKbfoikeg?autoplay=1&start=30&end=60&controls=0',
+          albumCover: 'https://img.youtube.com/vi/hTWKbfoikeg/maxresdefault.jpg'
         },
         {
-          id: 'fallback5',
-          title: 'Levitating',
-          artist: 'Dua Lipa',
-          previewUrl: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg',
-          albumCover: 'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=300&h=300&fit=crop'
+          id: 'YQHsXMglC9A',
+          title: 'Hello',
+          artist: 'Adele',
+          previewUrl: 'https://www.youtube.com/embed/YQHsXMglC9A?autoplay=1&start=30&end=60&controls=0',
+          albumCover: 'https://img.youtube.com/vi/YQHsXMglC9A/maxresdefault.jpg'
         },
         {
-          id: 'fallback6',
-          title: 'As It Was',
-          artist: 'Harry Styles',
-          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3',
-          albumCover: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'
+          id: 'RgKAFK5djSk',
+          title: 'Waka Waka',
+          artist: 'Shakira',
+          previewUrl: 'https://www.youtube.com/embed/RgKAFK5djSk?autoplay=1&start=30&end=60&controls=0',
+          albumCover: 'https://img.youtube.com/vi/RgKAFK5djSk/maxresdefault.jpg'
         },
         {
-          id: 'fallback7',
-          title: 'Stay',
-          artist: 'The Kid LAROI & Justin Bieber',
-          previewUrl: 'https://file-examples.com/storage/fe86e7b6b54c9b3dce6a4c4/2017/11/file_example_MP3_700KB.mp3',
-          albumCover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop'
-        },
-        {
-          id: 'fallback8',
-          title: 'Heat Waves',
-          artist: 'Glass Animals',
-          previewUrl: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
-          albumCover: 'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=300&h=300&fit=crop'
-        },
-        {
-          id: 'fallback9',
-          title: 'Anti-Hero',
-          artist: 'Taylor Swift',
-          previewUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3',
-          albumCover: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop'
-        },
-        {
-          id: 'fallback10',
-          title: 'Flowers',
-          artist: 'Miley Cyrus',
-          previewUrl: 'https://file-examples.com/storage/fe86e7b6b54c9b3dce6a4c4/2017/11/file_example_MP3_1MG.mp3',
-          albumCover: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop'
+          id: 'LOZuxwVk7TU',
+          title: 'Señorita',
+          artist: 'Shawn Mendes & Camila Cabello',
+          previewUrl: 'https://www.youtube.com/embed/LOZuxwVk7TU?autoplay=1&start=30&end=60&controls=0',
+          albumCover: 'https://img.youtube.com/vi/LOZuxwVk7TU/maxresdefault.jpg'
         }
       ]
       
-      console.log('📝 Usando canciones populares fallback:', fallbackSongs.length)
+      console.log('📝 Usando canciones YouTube conocidas:', fallbackSongs.length)
       setAvailableSongs(fallbackSongs)
     }
     
