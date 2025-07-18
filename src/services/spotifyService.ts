@@ -91,35 +91,77 @@ class SpotifyService {
     
     const token = await this.getAccessToken()
     
-    // Usar búsqueda con filtros para obtener canciones populares
-    const query = `genre:${genre} year:2020-2024`
-    const url = `${SPOTIFY_CONFIG.API_BASE_URL}/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}&market=ES`
-    
-    console.log('🔍 URL de búsqueda:', url)
-
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-
-    console.log('📊 Respuesta de búsqueda:', response.status, response.statusText)
-    
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ Error en búsqueda:', errorText)
-      throw new Error(`Failed to fetch tracks from Spotify: ${response.status}`)
+    // Estrategias de búsqueda más efectivas para obtener canciones con preview
+    const searchStrategies = {
+      'pop': [
+        'Bad Bunny OR Rosalía OR C. Tangana OR Aitana OR Lola Índigo',
+        'indie español OR indie spain OR spanish indie',
+        'top hits spain OR éxitos españa',
+        'reggaeton OR trap latino'
+      ],
+      'indie': [
+        'indie español OR indie spain OR spanish indie',
+        'Vetusta Morla OR Izal OR Love of Lesbian OR Zahara',
+        'indie rock español OR indie pop español',
+        'música independiente española'
+      ],
+      'latin': [
+        'Bad Bunny OR Rosalía OR Karol G OR Ozuna OR Daddy Yankee',
+        'reggaeton OR bachata OR salsa OR merengue',
+        'música latina OR latin hits',
+        'trap latino OR urbano latino'
+      ],
+      'rock': [
+        'rock español OR spanish rock',
+        'Mägo de Oz OR Héroes del Silencio OR Extremoduro',
+        'rock alternativo OR alternative rock',
+        'indie rock OR rock independiente'
+      ],
+      'electronic': [
+        'electronic dance OR EDM OR house music',
+        'Calvin Harris OR David Guetta OR Tiësto',
+        'deep house OR tech house OR progressive house',
+        'electronic hits OR dance hits'
+      ]
     }
+    
+    const queries = searchStrategies[genre as keyof typeof searchStrategies] || searchStrategies.pop
+    
+    for (const query of queries) {
+      console.log('🔍 Probando búsqueda:', query)
+      
+      const url = `${SPOTIFY_CONFIG.API_BASE_URL}/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}&market=ES`
+      console.log('� URL:', url)
 
-    const data: SpotifySearchResponse = await response.json()
-    console.log('📋 Canciones encontradas:', data.tracks.items.length)
-    console.log('🎵 Canciones con preview:', data.tracks.items.filter(track => track.preview_url !== null).length)
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      console.log('📊 Respuesta de búsqueda:', response.status, response.statusText)
+      
+      if (!response.ok) {
+        console.log('❌ Error en esta búsqueda, probando siguiente...')
+        continue
+      }
+
+      const data: SpotifySearchResponse = await response.json()
+      console.log('📋 Canciones encontradas:', data.tracks.items.length)
+      console.log('🎵 Canciones con preview:', data.tracks.items.filter(track => track.preview_url !== null).length)
+      
+      // Filtrar solo canciones con preview_url
+      const tracksWithPreview = data.tracks.items.filter(track => track.preview_url !== null)
+      console.log('✅ Canciones válidas (con preview):', tracksWithPreview.length)
+      
+      if (tracksWithPreview.length > 0) {
+        console.log('🎉 Encontradas canciones con preview, usando esta búsqueda')
+        return tracksWithPreview
+      }
+    }
     
-    // Filtrar solo canciones con preview_url
-    const tracksWithPreview = data.tracks.items.filter(track => track.preview_url !== null)
-    console.log('✅ Canciones válidas (con preview):', tracksWithPreview.length)
-    
-    return tracksWithPreview
+    console.log('😔 No se encontraron canciones con preview en ninguna búsqueda')
+    return []
   }
 
   // Obtener canciones de una playlist específica (para mejor calidad de juego)

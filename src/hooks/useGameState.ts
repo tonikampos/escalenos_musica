@@ -89,7 +89,8 @@ export const useGameState = () => {
         'hits': 'pop',
         'rock': 'rock',
         'latin': 'latin',
-        'electronic': 'electronic'
+        'electronic': 'electronic',
+        'indie': 'indie'
       }
       
       const genre = genreMap[category as keyof typeof genreMap] || 'pop'

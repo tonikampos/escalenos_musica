@@ -92,6 +92,7 @@ function App() {
                 >
                   <option value="pop">Pop</option>
                   <option value="hits">Top Hits</option>
+                  <option value="indie">Indie Español</option>
                   <option value="rock">Rock</option>
                   <option value="latin">Latino</option>
                   <option value="electronic">Electrónica</option>
