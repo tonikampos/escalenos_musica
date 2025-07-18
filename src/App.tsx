@@ -19,11 +19,7 @@ function App() {
     setMusicSource
   } = useGameState()
 
-  // Hacer clearCache accesible globalmente para depuración
-  useEffect(() => {
-    (window as any).clearMusicCache = clearCache
-    console.log('🔧 Para limpiar el caché, usa: window.clearMusicCache()')
-  }, [clearCache])
+  // Limpieza: sin logs ni clearCache global
 
   const audioRef = useRef<HTMLAudioElement>(null)
 
@@ -37,29 +33,20 @@ function App() {
   useEffect(() => {
     if (gameState.currentSong && gameState.isPlaying) {
       const previewUrl = gameState.currentSong.previewUrl
-      
-      if (isYouTubeUrl(previewUrl)) {
-        // Para YouTube, simplemente mostrar el iframe
-        console.log('🎵 Reproduciendo desde YouTube:', previewUrl)
-      } else {
-        // Para otros audios, usar el elemento audio
+      if (!isYouTubeUrl(previewUrl)) {
         if (audioRef.current) {
           audioRef.current.src = previewUrl
-          audioRef.current.play().catch(console.error)
+          audioRef.current.play().catch(() => {})
         }
       }
-      
-      // Pausar después de 10 segundos
       const timer = setTimeout(() => {
         if (audioRef.current && !isYouTubeUrl(previewUrl)) {
           audioRef.current.pause()
         }
         togglePlay()
       }, 10000)
-
       return () => clearTimeout(timer)
     } else {
-      // Pausar audio si no está reproduciéndose
       if (audioRef.current) {
         audioRef.current.pause()
       }
@@ -192,22 +179,7 @@ function App() {
 import { useState } from 'react'
   const [showLoading, setShowLoading] = useState(false);
           
-          {/* Debug info */}
-          <div className="mt-4 text-xs text-gray-400 text-center">
-            <button 
-              onClick={() => console.log('🔧 Debug Info:', {
-                hasClientId: !!import.meta.env.VITE_SPOTIFY_CLIENT_ID,
-                hasClientSecret: !!import.meta.env.VITE_SPOTIFY_CLIENT_SECRET,
-                redirectUri: import.meta.env.VITE_SPOTIFY_REDIRECT_URI,
-                availableSongs: availableSongs.length,
-                category: gameState.category,
-                difficulty: gameState.difficulty
-              })}
-              className="text-xs text-gray-500 hover:text-spotify-green"
-            >
-              🔧 Debug Info (Ver consola)
-            </button>
-          </div>
+
         </div>
       </div>
     )
